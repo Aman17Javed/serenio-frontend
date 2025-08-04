@@ -28,7 +28,7 @@ const SentimentAnalysisDashboard = () => {
     if (selectedSession) {
       fetchSentimentAnalysis();
     }
-  }, [selectedSession, fetchSentimentAnalysis, fetchSessions, sessionId]);
+  }, [selectedSession, sessionId]);
 
   const fetchSessions = async () => {
     try {
