@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000", // Direct baseURL for local development
+  baseURL: "https://serenio-production.up.railway.app/", // Direct baseURL for local development
   headers: {
     "Content-Type": "application/json",
   },
