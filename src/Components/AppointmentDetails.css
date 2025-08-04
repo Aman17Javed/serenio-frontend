@@ -1,0 +1,80 @@
+.appointment-details-container {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-details-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.appointment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.appointment-card {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+}
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.status-booked {
+  color: white;
+  background-color: green;
+}
+
+.status-cancelled {
+  color: white;
+  background-color: red;
+}
+.cancel-appointment-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-block;
+}
+
+.cancel-appointment-btn:hover {
+  background-color: #d9363e;
+}
+
+/* Optional: styling for status badge */
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-weight: bold;
+  color: white;
+  margin-left: 8px;
+}
+
+.status-booked {
+  background-color: green;
+}
+
+.status-cancelled {
+  background-color: red;
+}

@@ -1,0 +1,250 @@
+/* PsychologistDashboard.css */
+
+.dashboard-container {
+  padding: 32px;
+  background-color: #f9fafb;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.dashboard-header h1 {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}
+
+.dashboard-stats {
+  display: flex;
+  gap: 24px;
+  justify-content: space-around;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1 1 200px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.stat-card h3 {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.stat-card p {
+  font-size: 22px;
+  font-weight: bold;
+  color: #4f46e5;
+}
+
+.dashboard-actions {
+  margin-bottom: 32px;
+}
+
+.available-date {
+  background-color: #c8f7c5 !important;
+  border-radius: 50%;
+}
+
+.unavailable-date {
+  background-color: #f0f0f0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.action-buttons button:hover {
+  background-color: #4338ca;
+}
+
+.calendar-availability {
+  background-color: white;
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-availability h3 {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+.availability-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  background-color: #f3f4f6;
+}
+
+.availability-date:hover {
+  background-color: #e5e7eb;
+}
+
+.availability-date span {
+  font-size: 14px;
+  color: #333;
+}
+
+.availability-date button {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.availability-date button:hover {
+  background-color: #dc2626;
+}
+
+.charts-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+.chart-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.psych-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border-radius: 12px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+.psych-table th, .psych-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+}
+.psych-table th {
+  background: #f4f4f4;
+  font-weight: 600;
+  color: #333;
+}
+.psych-table tr:last-child td {
+  border-bottom: none;
+}
+.psych-table tr:hover {
+  background: #f9fafb;
+}
+.action-btn {
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-right: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.action-btn:hover {
+  background: #4338ca;
+}
+.client-analytics-list {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.client-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 18px 22px;
+  min-width: 220px;
+  max-width: 260px;
+  flex: 1 1 220px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.client-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.client-name {
+  font-weight: 600;
+  color: #333;
+}
+.client-sentiment {
+  font-size: 0.95em;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 8px;
+  background: #e0e7ff;
+  color: #3730a3;
+}
+.client-sentiment.positive {
+  background: #d1fae5;
+  color: #065f46;
+}
+.client-sentiment.negative {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.client-sentiment.neutral {
+  background: #f3f4f6;
+  color: #374151;
+}
+.client-info {
+  font-size: 0.95em;
+  color: #666;
+  margin-bottom: 6px;
+}
+.client-mood-trend {
+  font-size: 0.95em;
+  color: #4f46e5;
+  font-weight: 500;
+}
+.last-updated {
+  font-size: 0.95em;
+  color: #6b7280;
+  margin-bottom: 12px;
+  text-align: right;
+}
+

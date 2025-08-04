@@ -1,0 +1,391 @@
+.real-time-sentiment {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 1000;
+  font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
+}
+
+.sentiment-header {
+  background: linear-gradient(135deg, #1E2A47 0%, #2D3748 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sentiment-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.analyzing-indicator {
+  font-size: 18px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.sentiment-content {
+  padding: 20px;
+}
+
+/* Current Sentiment */
+.current-sentiment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sentiment-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.sentiment-indicator {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.sentiment-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1E2A47;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Emotion Breakdown */
+.emotion-breakdown {
+  margin-bottom: 20px;
+}
+
+.emotion-breakdown h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.emotion-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.emotion-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.emotion-item:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.emotion-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.emotion-name {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  text-transform: capitalize;
+}
+
+.emotion-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1E2A47;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Sentiment Trend */
+.sentiment-trend {
+  margin-bottom: 20px;
+}
+
+.sentiment-trend h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trend-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.trend-point {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Quick Stats */
+.quick-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+  background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+  transform: translateY(-1px);
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E2A47;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .real-time-sentiment {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    margin: 20px 0;
+    border-radius: 12px;
+  }
+  
+  .sentiment-content {
+    padding: 16px;
+  }
+  
+  .current-sentiment {
+    padding: 12px;
+  }
+  
+  .sentiment-circle {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .sentiment-indicator {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .sentiment-label {
+    font-size: 16px;
+  }
+  
+  .emotion-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .trend-line {
+    padding: 8px;
+  }
+  
+  .trend-point {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .real-time-sentiment {
+    margin: 10px 0;
+  }
+  
+  .sentiment-header {
+    padding: 12px 16px;
+  }
+  
+  .sentiment-header h3 {
+    font-size: 14px;
+  }
+  
+  .sentiment-content {
+    padding: 12px;
+  }
+  
+  .current-sentiment {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .sentiment-circle {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  
+  .quick-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .real-time-sentiment {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sentiment-content {
+    color: #F9FAFB;
+  }
+  
+  .current-sentiment {
+    background: linear-gradient(135deg, #374151 0%, #4B5563 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sentiment-label {
+    color: #F9FAFB;
+  }
+  
+  .emotion-breakdown h4,
+  .sentiment-trend h4 {
+    color: #D1D5DB;
+  }
+  
+  .emotion-item {
+    background: rgba(55, 65, 81, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .emotion-item:hover {
+    background: rgba(55, 65, 81, 1);
+  }
+  
+  .emotion-name {
+    color: #D1D5DB;
+  }
+  
+  .emotion-count {
+    color: #F9FAFB;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .trend-line {
+    background: rgba(55, 65, 81, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .stat-item {
+    background: linear-gradient(135deg, #374151 0%, #4B5563 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .stat-item:hover {
+    background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+  }
+  
+  .stat-label {
+    color: #9CA3AF;
+  }
+  
+  .stat-value {
+    color: #F9FAFB;
+  }
+}
+
+/* Animation Enhancements */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.sentiment-indicator {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Focus States */
+.real-time-sentiment:focus-within {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .real-time-sentiment * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+} 

@@ -1,0 +1,347 @@
+.professionals-container {
+  padding: 20px 0;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+h2 {
+  text-align: center;
+  color: #1a2e44;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  font-family: 'Helvetica', sans-serif;
+}
+
+p {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-family: 'Helvetica', sans-serif;
+}
+
+.search-filter {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-bar {
+  padding: 12px;
+  width: 300px;
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-bar:focus {
+  border-color: #2563eb;
+}
+
+.filter-button {
+  padding: 12px 25px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.filter-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.filter-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.psychologist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 250px);
+  gap: 20px;
+  padding: 0 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.psychologist-card {
+  background-color: white;
+  padding: 15px 10px; /* Adjusted padding */
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 250px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.psychologist-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.psychologist-image {
+  width: 200px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin: 0 auto;
+}
+
+.card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center; /* Center horizontally */
+}
+
+.psychologist-card h3 {
+  color: #1a2e44;
+  font-size: 1.2em;
+  margin: 10px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  padding: 0 5px;
+}
+
+.specialization-preview {
+  color: #6b7280;
+  font-size: 0.9em;
+  margin: 5px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  padding: 0 5px;
+}
+
+.view-profile {
+  padding: 8px 15px;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+  width: 80%;
+  margin-bottom: 10px;
+  align-self: center; /* Center within flex parent */
+}
+.view-profile:hover {
+  background-color: #059669;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.psychologist-modal {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #ef4444;
+  transition: color 0.3s ease;
+}
+
+.close-button:hover {
+  color: #dc2626;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.profile-header h3 {
+  color: #1a2e44;
+  font-size: 1.8em;
+  margin: 0;
+}
+
+.specialization {
+  color: #6b7280;
+  font-size: 1.1em;
+  margin: 5px 0;
+}
+
+.profile-bio {
+  margin-bottom: 20px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.profile-bio p {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.profile-info {
+  margin-bottom: 20px;
+}
+
+.profile-info p {
+  color: #4b5563;
+  font-size: 1em;
+  margin: 10px 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  color: #1a2e44;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background-color: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1em;
+  transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+button[type="submit"]:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.success {
+  color: #059669;
+  background-color: #d1fae5;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.error {
+  color: #dc2626;
+  background-color: #fee2e2;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.load-more {
+  display: block;
+  margin: 30px auto;
+  padding: 12px 25px;
+  background-color: #1a2e44;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.load-more:hover {
+  background-color: #12263a;
+}
+
+.loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .psychologist-card {
+    min-width: 200px;
+  }
+  .psychologist-modal {
+    width: 95%;
+    padding: 15px;
+  }
+}
