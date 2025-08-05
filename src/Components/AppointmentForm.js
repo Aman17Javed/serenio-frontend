@@ -227,16 +227,48 @@ const AppointmentForm = () => {
     }
   };
 
-  // Generate time slots (9 AM to 5 PM, 1-hour intervals)
+  // Generate time slots with better formatting and availability checking
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 9; hour <= 17; hour++) {
-      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+      const time = `${hour.toString().padStart(2, '0')}:00`;
+      const displayTime = hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`;
+      slots.push({ value: time, display: displayTime });
     }
     return slots;
   };
 
   const timeSlots = generateTimeSlots();
+
+  // Get available slots for selected date
+  const getAvailableSlots = async (date) => {
+    if (!date || !form.psychologistId) return timeSlots;
+    
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`/api/appointments/available-slots?psychologistId=${form.psychologistId}&date=${date}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      const availableSlots = response.data.availableSlots || [];
+      return timeSlots.map(slot => ({
+        ...slot,
+        available: availableSlots.includes(slot.value)
+      }));
+    } catch (error) {
+      console.error('Error fetching available slots:', error);
+      return timeSlots;
+    }
+  };
+
+  const [availableSlots, setAvailableSlots] = useState(timeSlots);
+
+  // Update available slots when date changes
+  useEffect(() => {
+    if (form.date && form.psychologistId) {
+      getAvailableSlots(form.date).then(setAvailableSlots);
+    }
+  }, [form.date, form.psychologistId]);
 
   return (
     <motion.div
@@ -279,30 +311,26 @@ const AppointmentForm = () => {
           min={new Date().toISOString().split('T')[0]}
         />
 
-        {/* Time Selection */}
-        <select
-          name="time"
-          value={form.time}
-          onChange={handleChange}
-          className="appointment-form-input"
-        >
-          <option value="">-- Select Time --</option>
-          {timeSlots.map((time) => {
-            const isBooked = checkTimeSlotConflict(form.date, time);
-            return (
-              <option 
-                key={time} 
-                value={time}
-                disabled={isBooked}
-                style={{ color: isBooked ? '#999' : '#000' }}
+        {/* Time Selection with Calendar View */}
+        <div className="time-slot-container">
+          <label className="form-label">Select Time Slot:</label>
+          <div className="time-slots-grid">
+            {availableSlots.map((slot) => (
+              <button
+                key={slot.value}
+                type="button"
+                className={`time-slot-button ${form.time === slot.value ? 'selected' : ''} ${!slot.available ? 'disabled' : ''}`}
+                onClick={() => setForm({ ...form, time: slot.value })}
+                disabled={!slot.available}
               >
-                {time} {isBooked ? '(Already Booked)' : ''}
-              </option>
-            );
-          })}
-        </select>
+                <span className="time-display">{slot.display}</span>
+                {!slot.available && <span className="booked-indicator">Booked</span>}
+              </button>
+            ))}
+          </div>
+        </div>
         
-        {form.date && timeSlots.every(time => checkTimeSlotConflict(form.date, time)) && (
+        {form.date && availableSlots.every(slot => !slot.available) && (
           <p className="message error">All time slots are booked for this date. Please select a different date.</p>
         )}
 

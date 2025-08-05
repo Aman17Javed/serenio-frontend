@@ -11,7 +11,6 @@ function Professionals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedPsychologist, setSelectedPsychologist] = useState(null);
-  const [bookingForm, setBookingForm] = useState({ date: "", timeSlot: "" });
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingMessage, setBookingMessage] = useState("");
   const navigate = useNavigate();
@@ -50,12 +49,7 @@ function Professionals() {
 
   const handleCloseModal = () => {
     setSelectedPsychologist(null);
-    setBookingForm({ date: "", timeSlot: "" });
     setBookingMessage("");
-  };
-
-  const handleBookingChange = (e) => {
-    setBookingForm({ ...bookingForm, [e.target.name]: e.target.value });
   };
 
   const handleBookAppointment = () => {
@@ -63,17 +57,11 @@ function Professionals() {
       setBookingMessage("Please select a psychologist.");
       return;
     }
-    if (!bookingForm.date || !bookingForm.timeSlot) {
-      setBookingMessage("Please fill date and time before proceeding.");
-      return;
-    }
     setBookingLoading(true);
     setTimeout(() => {
       navigate("/appointment-form", {
         state: {
           psychologist: selectedPsychologist,
-          date: bookingForm.date,
-          timeSlot: bookingForm.timeSlot,
         },
       });
       setBookingLoading(false);
@@ -194,40 +182,20 @@ function Professionals() {
                 <p><strong>Rating:</strong> ⭐ {selectedPsychologist.rating || "N/A"} ({selectedPsychologist.reviews || 0} reviews)</p>
                 <p><strong>Experience:</strong> {selectedPsychologist.experience || "N/A"}</p>
                 <p><strong>Availability:</strong> {selectedPsychologist.availability || "Check availability"}</p>
+                <p><strong>Session Price:</strong> PKR {selectedPsychologist.sessionPrice || selectedPsychologist.hourlyRate || "N/A"}</p>
               </div>
-              <form className="booking-form">
-                <div className="form-group">
-                  <label htmlFor="date">Date:</label>
-                  <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={bookingForm.date}
-                    onChange={handleBookingChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="timeSlot">Time Slot:</label>
-                  <input
-                    type="time"
-                    id="timeSlot"
-                    name="timeSlot"
-                    value={bookingForm.timeSlot}
-                    onChange={handleBookingChange}
-                    required
-                  />
-                </div>
+              <div className="booking-actions">
                 <motion.button
                   type="button"
                   onClick={handleBookAppointment}
                   disabled={bookingLoading}
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ scale: 1.05 }}
+                  className="book-appointment-btn"
                 >
-                  {bookingLoading ? "Loading..." : "Proceed to Confirmation"}
+                  {bookingLoading ? "Loading..." : "📅 Book Appointment"}
                 </motion.button>
-              </form>
+              </div>
               {bookingMessage && (
                 <p className={bookingMessage.includes("successfully") ? "success" : "error"}>
                   {bookingMessage}

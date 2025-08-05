@@ -96,3 +96,107 @@
 .appointment-list button:hover {
   background: #c82333;
 }
+
+/* Time Slot Grid Styles */
+.time-slot-container {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #333;
+}
+
+.time-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.time-slot-button {
+  padding: 12px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 60px;
+  position: relative;
+}
+
+.time-slot-button:hover:not(.disabled) {
+  border-color: #007bff;
+  background: #f8f9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.time-slot-button.selected {
+  border-color: #007bff;
+  background: #007bff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.time-slot-button.disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+
+.time-display {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.booked-indicator {
+  font-size: 10px;
+  color: #dc3545;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.time-slot-button.selected .booked-indicator {
+  color: #fff;
+}
+
+/* Calendar-like date input styling */
+.appointment-form input[type="date"] {
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  background: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.appointment-form input[type="date"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  
+  .time-slot-button {
+    padding: 10px 6px;
+    min-height: 50px;
+  }
+  
+  .time-display {
+    font-size: 12px;
+  }
+}

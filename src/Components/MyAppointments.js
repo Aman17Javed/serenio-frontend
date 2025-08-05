@@ -41,7 +41,24 @@ const MyAppointments = () => {
       }
       
       console.log('Processed appointments data:', appointmentsData);
-      setAppointments(appointmentsData);
+      
+      // Sort appointments: Booked first, then Completed, then Cancelled last
+      const sortedAppointments = appointmentsData.sort((a, b) => {
+        const statusOrder = { 'Booked': 1, 'Completed': 2, 'Cancelled': 3 };
+        const statusA = statusOrder[a.status] || 4;
+        const statusB = statusOrder[b.status] || 4;
+        
+        if (statusA !== statusB) {
+          return statusA - statusB;
+        }
+        
+        // If same status, sort by date (earliest first)
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA - dateB;
+      });
+      
+      setAppointments(sortedAppointments);
       setError('');
     } catch (err) {
       console.error('Failed to fetch appointments:', err);
@@ -237,30 +254,53 @@ const MyAppointments = () => {
       ) : (
         <div className="appointments-list">
           {appointments.map(appointment => (
-            <div key={appointment._id} className="appointment-card">
+            <div key={appointment._id} className={`appointment-card ${appointment.status === 'Cancelled' ? 'cancelled' : ''}`}>
               <div className="appointment-header">
-                <h3>Dr. {appointment.psychologistId?.name || appointment.psychologistName || 'Unknown'}</h3>
-                <span className={`status ${getStatusColor(appointment.status)}`}>
-                  {appointment.status || 'Booked'}
-                </span>
+                <div className="psychologist-info">
+                  <h3>Dr. {appointment.psychologistId?.name || appointment.psychologistName || 'Unknown'}</h3>
+                  <p className="specialization">{appointment.psychologistId?.specialization || appointment.specialization || 'N/A'}</p>
+                </div>
+                <div className={`status-badge ${getStatusColor(appointment.status)}`}>
+                  <span className="status-icon">
+                    {appointment.status === 'Booked' && '📅'}
+                    {appointment.status === 'Completed' && '✅'}
+                    {appointment.status === 'Cancelled' && '❌'}
+                  </span>
+                  <span className="status-text">{appointment.status || 'Booked'}</span>
+                </div>
               </div>
               
               <div className="appointment-details">
-                <p><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
-                <p><strong>Time:</strong> {appointment.timeSlot || appointment.time}</p>
-                <p><strong>Specialization:</strong> {appointment.psychologistId?.specialization || appointment.specialization || 'N/A'}</p>
+                <div className="detail-row">
+                  <span className="detail-label">📅 Date:</span>
+                  <span className="detail-value">{new Date(appointment.date).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">🕐 Time:</span>
+                  <span className="detail-value">{appointment.timeSlot || appointment.time}</span>
+                </div>
                 {appointment.reason && (
-                  <p><strong>Reason:</strong> {appointment.reason}</p>
+                  <div className="detail-row">
+                    <span className="detail-label">📝 Reason:</span>
+                    <span className="detail-value">{appointment.reason}</span>
+                  </div>
                 )}
               </div>
               
               {(appointment.status === 'Booked' || !appointment.status) && (
-                <button
-                  onClick={() => handleCancelAppointment(appointment._id)}
-                  className="cancel-button"
-                >
-                  Cancel Appointment
-                </button>
+                <div className="appointment-actions">
+                  <button
+                    onClick={() => handleCancelAppointment(appointment._id)}
+                    className="cancel-button"
+                  >
+                    🚫 Cancel Appointment
+                  </button>
+                </div>
               )}
             </div>
           ))}
