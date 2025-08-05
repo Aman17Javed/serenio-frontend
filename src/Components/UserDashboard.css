@@ -3,7 +3,7 @@
 /* Modern Dashboard Styles */
 .modern-dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff; /* Changed to white background */
   padding: 2rem;
   font-family: "DM Sans", sans-serif;
   color: #1f2937;
@@ -19,8 +19,8 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #ffffff; /* Changed to white background */
+  color: #1f2937; /* Changed text color for better readability */
   padding-top: 80px; /* Add top padding to prevent navbar overlap */
 }
 
@@ -28,17 +28,18 @@
   margin-top: 1rem;
   font-size: 1.1rem;
   opacity: 0.9;
+  color: #374151; /* Ensure readable text color */
+  font-weight: 500;
 }
 
 /* Header Section */
 .dashboard-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #f8fafc; /* Light gray background for contrast */
   border-radius: 20px;
   padding: 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   margin-top: 1rem; /* Add top margin for better spacing */
 }
 
@@ -63,7 +64,7 @@
 
 .welcome-section p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: #374151; /* Improved color for better readability */
   margin: 0;
   font-weight: 500; /* Improve readability */
 }
@@ -83,6 +84,7 @@
   justify-content: center;
   margin: 0 auto 1rem;
   position: relative;
+  background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
 .score-inner {
@@ -130,13 +132,12 @@
 }
 
 .action-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 16px;
   padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   cursor: pointer;
   color: #1f2937; /* Ensure text is readable */
@@ -144,7 +145,8 @@
 
 .action-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: #667eea;
 }
 
 .action-icon {
@@ -175,19 +177,19 @@
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   color: #1f2937; /* Ensure text is readable */
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-color: #667eea;
 }
 
 .stat-icon {
@@ -228,12 +230,11 @@
 }
 
 .chart-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   color: #1f2937; /* Ensure text is readable */
 }
 
@@ -261,12 +262,11 @@
 }
 
 .insight-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   color: #1f2937; /* Ensure text is readable */
 }
 
@@ -287,7 +287,7 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(107, 114, 128, 0.1);
+  border-bottom: 1px solid #e5e7eb;
   color: #374151; /* Ensure text is readable */
 }
 
@@ -320,13 +320,13 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(107, 114, 128, 0.1);
+  border-bottom: 1px solid #e5e7eb;
   transition: all 0.3s ease;
   color: #374151; /* Ensure text is readable */
 }
 
 .activity-item:hover {
-  background: rgba(102, 126, 234, 0.05);
+  background: #f8fafc;
   border-radius: 8px;
   padding-left: 0.5rem;
 }
@@ -368,8 +368,8 @@
 
 /* Error Message */
 .error-message {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 12px;
   padding: 1rem;
   margin: 1rem 0;
@@ -458,19 +458,18 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff; /* Changed to white background */
   padding: 2rem;
   padding-top: 100px; /* Add top padding to prevent navbar overlap */
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: #f8fafc;
   border-radius: 20px;
   padding: 3rem;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   max-width: 400px;
   width: 100%;
   color: #1f2937; /* Ensure text is readable */
@@ -489,7 +488,7 @@
 
 .login-card p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: #374151; /* Improved color for better readability */
   margin-bottom: 2rem;
   line-height: 1.6;
   font-weight: 500; /* Improve readability */
@@ -539,13 +538,12 @@
 }
 
 .empty-state-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: #f8fafc;
   border-radius: 20px;
   padding: 3rem;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   max-width: 500px;
   width: 100%;
   color: #1f2937; /* Ensure text is readable */
@@ -566,7 +564,7 @@
 
 .empty-state-card p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: #374151; /* Improved color for better readability */
   margin-bottom: 2rem;
   line-height: 1.6;
   font-weight: 500; /* Improve readability */

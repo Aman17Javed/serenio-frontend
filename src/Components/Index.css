@@ -40,12 +40,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 24px; /* Add gap between main sections */
 }
 
 .nav-logo {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0; /* Prevent logo from shrinking */
 }
 
 .logo-text {
@@ -58,7 +60,8 @@
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 40px; /* Increased gap between menu items */
+  margin: 0 20px; /* Add margin on sides */
 }
 
 .nav-link {
@@ -70,11 +73,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 8px 12px; /* Add padding for better touch targets */
+  border-radius: 8px; /* Add border radius for hover effect */
 }
 
 .nav-link:hover {
   color: white;
   transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1); /* Add subtle background on hover */
 }
 
 .nav-icon {
@@ -84,11 +90,12 @@
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px; /* Increased gap between action buttons */
+  flex-shrink: 0; /* Prevent actions from shrinking */
 }
 
 .nav-btn {
-  padding: 10px 20px;
+  padding: 12px 24px; /* Increased padding for better touch targets */
   border-radius: 12px;
   font-weight: 600;
   font-size: 14px;
@@ -98,6 +105,8 @@
   align-items: center;
   gap: 8px;
   border: none;
+  min-width: 100px; /* Ensure consistent button width */
+  justify-content: center; /* Center content */
 }
 
 .nav-btn.primary {
@@ -135,10 +144,13 @@
   font-size: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
+  padding: 8px; /* Add padding for better touch target */
+  border-radius: 8px; /* Add border radius for hover effect */
 }
 
 .nav-toggle:hover {
   transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.1); /* Add subtle background on hover */
 }
 
 /* Main Content */
