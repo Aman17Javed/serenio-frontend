@@ -21,26 +21,22 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const prevDataRef = React.useRef({ users: [], appointments: [], transactions: [] });
 
   useEffect(() => {
-    if (isLoggedIn) {
-      fetchDashboardData();
-      const interval = setInterval(() => {
-        fetchDashboardData(true);
-      }, POLL_INTERVAL);
-      return () => clearInterval(interval);
-    }
-  }, [isLoggedIn]);
+    fetchDashboardData();
+    const interval = setInterval(() => {
+      fetchDashboardData(true);
+    }, POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchDashboardData = async (isPolling = false) => {
     setLoading(!isPolling);
     setError("");
     try {
-      const res = await axios.post("/api/admin/simple-dashboard", credentials);
+      const res = await axios.get("/api/admin/simple-dashboard");
       setData(res.data);
       setLastUpdated(Date.now());
       if (isPolling) {
@@ -73,14 +69,10 @@ const AdminDashboard = () => {
         };
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load dashboard data. Ensure correct admin credentials.");
+      setError(err.response?.data?.message || "Failed to load dashboard data.");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLogin = async () => {
-    setIsLoggedIn(true);
   };
 
   // User actions
@@ -135,30 +127,14 @@ const AdminDashboard = () => {
   };
 
   if (loading) return <Loader />;
-  if (!isLoggedIn) {
+  if (error) {
     return (
-      <div className="admin-login-container">
-        <h2>Admin Login</h2>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={credentials.email}
-          onChange={e => setCredentials({ ...credentials, email: e.target.value })}
-          className="admin-login-input"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={credentials.password}
-          onChange={e => setCredentials({ ...credentials, password: e.target.value })}
-          className="admin-login-input"
-        />
-        <button onClick={handleLogin} className="admin-login-button">
-          Login
+      <div className="admin-error-container">
+        <h2>Error Loading Dashboard</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()} className="admin-login-button">
+          Retry
         </button>
-        {error && <p className="error-message">{error}</p>}
       </div>
     );
   }
