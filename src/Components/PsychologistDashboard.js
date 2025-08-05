@@ -8,46 +8,11 @@ import {
 import { motion } from "framer-motion";
 import api from "../api/axios";
 import "./PsychologistDashboard.css";
-import { FaCheckCircle, FaEnvelope, FaUser } from "react-icons/fa";
+import { FaCheckCircle, FaEnvelope, FaUser, FaCalendarAlt, FaChartBar, FaUsers, FaDollarSign, FaClock } from "react-icons/fa";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const COLORS = ["#4CAF50", "#FF5722", "#FFC107", "#2196F3"];
-
-const mockAppointments = [
-  {
-    id: "appt1",
-    user: { name: "Alice Smith", email: "alice@example.com" },
-    date: "2024-06-20",
-    time: "10:00 AM",
-    status: "Scheduled",
-  },
-  {
-    id: "appt2",
-    user: { name: "Bob Lee", email: "bob@example.com" },
-    date: "2024-06-21",
-    time: "2:00 PM",
-    status: "Scheduled",
-  },
-];
-const mockClients = [
-  {
-    id: "user1",
-    name: "Alice Smith",
-    lastSession: "2024-06-10",
-    moodTrend: [3, 4, 5, 4, 5],
-    sentiment: "Positive",
-  },
-  {
-    id: "user2",
-    name: "Bob Lee",
-    lastSession: "2024-06-12",
-    moodTrend: [2, 3, 3, 4, 3],
-    sentiment: "Neutral",
-  },
-];
-
-const POLL_INTERVAL = 20000; // 20 seconds
 
 const PsychologistDashboard = () => {
   const [availability, setAvailability] = useState([]);
@@ -62,6 +27,12 @@ const PsychologistDashboard = () => {
   const [errorAppointments, setErrorAppointments] = useState("");
   const [errorClients, setErrorClients] = useState("");
   const [lastUpdated, setLastUpdated] = useState(Date.now());
+  const [dashboardStats, setDashboardStats] = useState({
+    totalAppointments: 0,
+    activeClients: 0,
+    totalRevenue: 0,
+    avgSessionTime: 0
+  });
   const prevDataRef = React.useRef({ appointments: [], clients: [] });
 
   useEffect(() => {
@@ -71,41 +42,37 @@ const PsychologistDashboard = () => {
     fetchClients();
     const interval = setInterval(() => {
       pollUpdates();
-    }, POLL_INTERVAL);
+    }, 20000);
     return () => clearInterval(interval);
   }, []);
 
   const pollUpdates = async () => {
     try {
-      // Appointments
       const psychologistId = localStorage.getItem("userId");
       const apptRes = await api.get(`/api/psychologists/appointments?psychologistId=${psychologistId}`);
       const newAppointments = apptRes.data;
-      // Clients
       const clientRes = await api.get(`/api/psychologists/clients?psychologistId=${psychologistId}`);
       const newClients = clientRes.data;
-      // Alerts
+      
       const prev = prevDataRef.current;
-      // New appointment
       if (newAppointments.length > prev.appointments.length) {
-        toast.info("New appointment booked!");
+        toast.info("🎉 New appointment booked!");
       }
-      // Status change
       const prevStatus = prev.appointments.map(a => a.status).join(',');
       const newStatus = newAppointments.map(a => a.status).join(',');
       if (prevStatus !== newStatus) {
-        toast.info("An appointment status changed.");
+        toast.info("📅 An appointment status changed.");
       }
-      // New client
       if (newClients.length > prev.clients.length) {
-        toast.info("New client added!");
+        toast.info("👥 New client added!");
       }
+      
       setAppointments(newAppointments);
       setClients(newClients);
       setLastUpdated(Date.now());
       prevDataRef.current = { appointments: newAppointments, clients: newClients };
     } catch (err) {
-      // Optionally show error toast
+      console.error("Polling error:", err);
     }
   };
 
@@ -121,9 +88,19 @@ const PsychologistDashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       const res = await api.get("/api/psychologists/stats");
-      setBookingStats(res.data.bookings);
-      setRevenueStats(res.data.revenue);
-      setStatusStats(res.data.status);
+      setBookingStats(res.data.bookings || []);
+      setRevenueStats(res.data.revenue || []);
+      setStatusStats(res.data.status || []);
+      
+      // Calculate dashboard stats
+      const totalAppointments = res.data.bookings?.reduce((sum, item) => sum + item.bookings, 0) || 0;
+      const totalRevenue = res.data.revenue?.reduce((sum, item) => sum + item.revenue, 0) || 0;
+      setDashboardStats({
+        totalAppointments,
+        activeClients: clients.length,
+        totalRevenue,
+        avgSessionTime: 45 // Default value
+      });
     } catch (err) {
       console.error("Failed to fetch stats", err);
     }
@@ -134,8 +111,10 @@ const PsychologistDashboard = () => {
     try {
       const res = await api.put("/api/psychologists/toggle-availability", { date: dateStr });
       setAvailability(res.data.dates);
+      toast.success("✅ Availability updated successfully!");
     } catch (err) {
       console.error("Failed to update availability", err);
+      toast.error("❌ Failed to update availability");
     }
   };
 
@@ -148,7 +127,6 @@ const PsychologistDashboard = () => {
     setLoadingAppointments(true);
     setErrorAppointments("");
     try {
-      // Get psychologistId from localStorage or JWT
       const psychologistId = localStorage.getItem("userId");
       const res = await api.get(`/api/psychologists/appointments?psychologistId=${psychologistId}`);
       setAppointments(res.data);
@@ -163,7 +141,6 @@ const PsychologistDashboard = () => {
     setLoadingClients(true);
     setErrorClients("");
     try {
-      // This endpoint may need to be created or replaced with analytics aggregation
       const psychologistId = localStorage.getItem("userId");
       const res = await api.get(`/api/psychologists/clients?psychologistId=${psychologistId}`);
       setClients(res.data);
@@ -177,9 +154,19 @@ const PsychologistDashboard = () => {
   const handleMarkComplete = async (appointmentId) => {
     try {
       await api.put(`/api/appointments/complete/${appointmentId}`);
-      fetchAppointments(); // Refresh list
+      fetchAppointments();
+      toast.success("✅ Appointment marked as complete!");
     } catch (err) {
-      alert("Failed to mark appointment as complete");
+      toast.error("❌ Failed to mark appointment as complete");
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'booked': return '#4CAF50';
+      case 'completed': return '#2196F3';
+      case 'cancelled': return '#FF5722';
+      default: return '#9E9E9E';
     }
   };
 
@@ -188,138 +175,376 @@ const PsychologistDashboard = () => {
       className="psych-dashboard"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.6 }}
     >
-      <motion.h2
-        initial={{ y: -20, opacity: 0 }}
+      {/* Header Section */}
+      <motion.div
+        className="dashboard-header"
+        initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1 }}
       >
-        Psychologist Dashboard
-      </motion.h2>
-      <ToastContainer position="top-right" autoClose={4000} />
-      <div className="last-updated">Last updated: {new Date(lastUpdated).toLocaleTimeString()}</div>
+        <div className="header-content">
+          <div className="header-text">
+            <h1 className="header-title">🧠 Psychologist Dashboard</h1>
+            <p className="header-subtitle">Manage your practice and client sessions</p>
+            <div className="last-updated">
+              Last updated: {new Date(lastUpdated).toLocaleTimeString()}
+            </div>
+          </div>
+          <div className="header-actions">
+            <motion.button
+              className="btn-primary"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              📊 View Reports
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
 
+      {/* Stats Cards */}
       <motion.div
-        className="dashboard-section"
+        className="stats-grid"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <h3>Manage Availability</h3>
-        <Calendar
-          value={selectedDate}
-          onClickDay={(date) => {
-            setSelectedDate(date);
-            toggleAvailability(date);
-          }}
-          tileClassName={({ date }) =>
-            isAvailable(date) ? "available-date" : "unavailable-date"
-          }
-        />
-      </motion.div>
-
-      <motion.div
-        className="dashboard-section charts"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <div className="chart-box">
-          <h4>Weekly Bookings</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={bookingStats}>
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="bookings" fill="#4CAF50" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="chart-box">
-          <h4>Monthly Revenue</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={revenueStats}>
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="revenue" stroke="#2196F3" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="chart-box">
-          <h4>Appointment Status</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie data={statusStats} dataKey="value" nameKey="status" outerRadius={80}>
-                {statusStats.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
-
-      <motion.div className="dashboard-section" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
-        <h3>Upcoming Appointments</h3>
-        {loadingAppointments ? <div>Loading...</div> : errorAppointments ? <div style={{color:'red'}}>{errorAppointments}</div> : (
-          <table className="psych-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments.map((appt) => (
-                <tr key={appt._id}>
-                  <td>{appt.userId?.name || "Unknown"}</td>
-                  <td>{appt.date}</td>
-                  <td>{appt.timeSlot}</td>
-                  <td>{appt.status}</td>
-                  <td>
-                    <button title="Mark Complete" className="action-btn" onClick={() => handleMarkComplete(appt._id)}><FaCheckCircle /></button>
-                    <button title="Message User" className="action-btn"><FaEnvelope /></button>
-                    <button title="View Profile" className="action-btn"><FaUser /></button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </motion.div>
-
-      <motion.div className="dashboard-section" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.18 }}>
-        <h3>Client Analytics</h3>
-        {loadingClients ? <div>Loading...</div> : errorClients ? <div style={{color:'red'}}>{errorClients}</div> : (
-          <div className="client-analytics-list">
-            {clients.map((client) => (
-              <div className="client-card" key={client._id}>
-                <div className="client-header">
-                  <span className="client-name">{client.name}</span>
-                  <span className={`client-sentiment ${client.sentiment?.toLowerCase()}`}>{client.sentiment || "N/A"}</span>
-                </div>
-                <div className="client-info">
-                  <span>Last Session: {client.lastSession || "N/A"}</span>
-                </div>
-                <div className="client-mood-trend">
-                  Mood Trend: {client.moodTrend ? client.moodTrend.join(" → ") : "N/A"}
-                </div>
-              </div>
-            ))}
+        <motion.div
+          className="stat-card"
+          whileHover={{ scale: 1.02, y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <div className="stat-icon">
+            <FaCalendarAlt />
           </div>
-        )}
+          <div className="stat-content">
+            <h3 className="stat-title">Total Appointments</h3>
+            <p className="stat-value">{dashboardStats.totalAppointments}</p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="stat-card"
+          whileHover={{ scale: 1.02, y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <div className="stat-icon">
+            <FaUsers />
+          </div>
+          <div className="stat-content">
+            <h3 className="stat-title">Active Clients</h3>
+            <p className="stat-value">{dashboardStats.activeClients}</p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="stat-card"
+          whileHover={{ scale: 1.02, y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <div className="stat-icon">
+            <FaDollarSign />
+          </div>
+          <div className="stat-content">
+            <h3 className="stat-title">Total Revenue</h3>
+            <p className="stat-value">${dashboardStats.totalRevenue}</p>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="stat-card"
+          whileHover={{ scale: 1.02, y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <div className="stat-icon">
+            <FaClock />
+          </div>
+          <div className="stat-content">
+            <h3 className="stat-title">Avg Session</h3>
+            <p className="stat-value">{dashboardStats.avgSessionTime} min</p>
+          </div>
+        </motion.div>
       </motion.div>
+
+      {/* Main Content Grid */}
+      <div className="dashboard-content">
+        {/* Left Column */}
+        <div className="content-left">
+          {/* Calendar Section */}
+          <motion.div
+            className="dashboard-section calendar-section"
+            initial={{ x: -30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="section-header">
+              <h3 className="section-title">
+                <FaCalendarAlt className="section-icon" />
+                Manage Availability
+              </h3>
+              <p className="section-subtitle">Click dates to toggle availability</p>
+            </div>
+            <div className="calendar-container">
+              <Calendar
+                value={selectedDate}
+                onClickDay={(date) => {
+                  setSelectedDate(date);
+                  toggleAvailability(date);
+                }}
+                tileClassName={({ date }) =>
+                  isAvailable(date) ? "available-date" : "unavailable-date"
+                }
+                className="modern-calendar"
+              />
+            </div>
+          </motion.div>
+
+          {/* Appointments Section */}
+          <motion.div
+            className="dashboard-section appointments-section"
+            initial={{ x: -30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="section-header">
+              <h3 className="section-title">
+                <FaUsers className="section-icon" />
+                Upcoming Appointments
+              </h3>
+              <p className="section-subtitle">Manage your scheduled sessions</p>
+            </div>
+            
+            {loadingAppointments ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>Loading appointments...</p>
+              </div>
+            ) : errorAppointments ? (
+              <div className="error-state">
+                <p>{errorAppointments}</p>
+              </div>
+            ) : (
+              <div className="appointments-list">
+                {appointments.length === 0 ? (
+                  <div className="empty-state">
+                    <p>No upcoming appointments</p>
+                  </div>
+                ) : (
+                  appointments.map((appt) => (
+                    <motion.div
+                      key={appt._id}
+                      className="appointment-card"
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <div className="appointment-header">
+                        <div className="client-info">
+                          <h4 className="client-name">{appt.userId?.name || "Unknown"}</h4>
+                          <p className="appointment-date">{appt.date} at {appt.timeSlot}</p>
+                        </div>
+                        <div 
+                          className="status-badge"
+                          style={{ backgroundColor: getStatusColor(appt.status) }}
+                        >
+                          {appt.status}
+                        </div>
+                      </div>
+                      <div className="appointment-actions">
+                        <motion.button
+                          className="action-btn primary"
+                          onClick={() => handleMarkComplete(appt._id)}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          title="Mark Complete"
+                        >
+                          <FaCheckCircle />
+                        </motion.button>
+                        <motion.button
+                          className="action-btn secondary"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          title="Message User"
+                        >
+                          <FaEnvelope />
+                        </motion.button>
+                        <motion.button
+                          className="action-btn secondary"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          title="View Profile"
+                        >
+                          <FaUser />
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Right Column */}
+        <div className="content-right">
+          {/* Charts Section */}
+          <motion.div
+            className="dashboard-section charts-section"
+            initial={{ x: 30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="section-header">
+              <h3 className="section-title">
+                <FaChartBar className="section-icon" />
+                Analytics Overview
+              </h3>
+              <p className="section-subtitle">Track your practice performance</p>
+            </div>
+            
+            <div className="charts-grid">
+              <motion.div
+                className="chart-card"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <h4 className="chart-title">Weekly Bookings</h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={bookingStats}>
+                    <XAxis dataKey="week" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="bookings" fill="#4CAF50" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </motion.div>
+
+              <motion.div
+                className="chart-card"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <h4 className="chart-title">Monthly Revenue</h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={revenueStats}>
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="#2196F3" 
+                      strokeWidth={3}
+                      dot={{ fill: '#2196F3', strokeWidth: 2, r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </motion.div>
+
+              <motion.div
+                className="chart-card"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <h4 className="chart-title">Appointment Status</h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie 
+                      data={statusStats} 
+                      dataKey="value" 
+                      nameKey="status" 
+                      outerRadius={60}
+                      innerRadius={30}
+                    >
+                      {statusStats.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Clients Section */}
+          <motion.div
+            className="dashboard-section clients-section"
+            initial={{ x: 30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="section-header">
+              <h3 className="section-title">
+                <FaUsers className="section-icon" />
+                Client Analytics
+              </h3>
+              <p className="section-subtitle">Monitor client progress and sentiment</p>
+            </div>
+            
+            {loadingClients ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>Loading clients...</p>
+              </div>
+            ) : errorClients ? (
+              <div className="error-state">
+                <p>{errorClients}</p>
+              </div>
+            ) : (
+              <div className="clients-grid">
+                {clients.length === 0 ? (
+                  <div className="empty-state">
+                    <p>No clients found</p>
+                  </div>
+                ) : (
+                  clients.map((client) => (
+                    <motion.div
+                      key={client._id}
+                      className="client-card"
+                      whileHover={{ scale: 1.02, y: -5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <div className="client-header">
+                        <h4 className="client-name">{client.name}</h4>
+                        <div className={`sentiment-badge ${client.sentiment?.toLowerCase()}`}>
+                          {client.sentiment || "N/A"}
+                        </div>
+                      </div>
+                      <div className="client-details">
+                        <p className="last-session">
+                          <strong>Last Session:</strong> {client.lastSession || "N/A"}
+                        </p>
+                        <div className="mood-trend">
+                          <strong>Mood Trend:</strong>
+                          <div className="trend-indicators">
+                            {client.moodTrend ? 
+                              client.moodTrend.map((mood, idx) => (
+                                <span key={idx} className="mood-indicator">
+                                  {mood}
+                                </span>
+                              ))
+                              : <span>N/A</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </div>
+
+      <ToastContainer 
+        position="top-right" 
+        autoClose={4000}
+        toastClassName="modern-toast"
+      />
     </motion.div>
   );
 };
