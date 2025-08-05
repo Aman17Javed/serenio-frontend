@@ -79,7 +79,7 @@ const PsychologistDashboard = () => {
     try {
       // Appointments
       const psychologistId = localStorage.getItem("userId");
-      const apptRes = await api.get(`/api/appointments?psychologistId=${psychologistId}`);
+      const apptRes = await api.get(`/api/psychologists/appointments?psychologistId=${psychologistId}`);
       const newAppointments = apptRes.data;
       // Clients
       const clientRes = await api.get(`/api/psychologists/clients?psychologistId=${psychologistId}`);
@@ -150,7 +150,7 @@ const PsychologistDashboard = () => {
     try {
       // Get psychologistId from localStorage or JWT
       const psychologistId = localStorage.getItem("userId");
-      const res = await api.get(`/api/appointments?psychologistId=${psychologistId}`);
+      const res = await api.get(`/api/psychologists/appointments?psychologistId=${psychologistId}`);
       setAppointments(res.data);
     } catch (err) {
       setErrorAppointments("Failed to load appointments");

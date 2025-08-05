@@ -17,8 +17,8 @@ const Reports = () => {
     fetchReports();
   }, []);
 
-  const fetchReports = async () => {
-    try {
+    const fetchReports = async () => {
+      try {
       setLoading(true);
       // Fetch user's chat sessions and generate reports
       const sessionsResponse = await api.get("/api/chatlogs/sessions");
@@ -64,13 +64,13 @@ const Reports = () => {
 
       const validReports = reportsData.filter(report => report !== null);
       setReports(validReports);
-    } catch (error) {
-      console.error("Failed to fetch reports", error);
+      } catch (error) {
+        console.error("Failed to fetch reports", error);
       toast.error("❌ Failed to load reports. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const generateReportName = (chatLogs, sentiment) => {
     const firstMessage = chatLogs[0].message.toLowerCase();
