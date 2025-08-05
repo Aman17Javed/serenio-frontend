@@ -235,7 +235,7 @@ const SentimentAnalysisDashboard = () => {
       link.remove();
     } catch (err) {
       console.error("Report generation failed:", err.message);
-      alert("Failed to generate report. Please try again.");
+      alert("Failed to port. Please try again.");
     }
   };
 

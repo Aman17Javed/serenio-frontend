@@ -9,7 +9,7 @@ import PaymentComponent from "./PaymentComponent";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe("pk_test_XXXXXXXXXXXXXXXXXXXXXXXX"); // TODO: Replace with your real Stripe publishable key from https://dashboard.stripe.com/apikeys
+const stripePromise = loadStripe("pk_test_51Ro39SFK7fdjAsTu02RjrN8UJX1qN1FYYKmftiHoI56HPuEGesbqH3a2P9KlrsszL5CRspkvYXgGBRvJeH1CbUHZ00oV3h7S2C"); // TODO: Replace with your real Stripe publishable key from https://dashboard.stripe.com/apikeys
 
 const PaymentForm = () => {
   const location = useLocation();
