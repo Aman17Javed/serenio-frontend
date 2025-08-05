@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Login.css";
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebookF } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUser, FaLock } from "react-icons/fa";
 import api from "../api/axios";
 import Loader from "./Loader";
 import { jwtDecode } from "jwt-decode";
@@ -104,50 +104,53 @@ const AnimatedLogin = () => {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <motion.h2
-          className="login-title"
+        <motion.div
+          className="login-header"
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
           <img src={require("../assets/signupLogo.png")} alt="logo" className="logo-img" />
-        </motion.h2>
+          <h2 className="login-title">Welcome Back</h2>
+          <p className="login-subtitle">Sign in to your account to continue</p>
+        </motion.div>
 
-        <motion.p
-          className="login-subtitle"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          Please sign in to your account
-        </motion.p>
-
-        <motion.input
-          type="email"
-          className="login-input"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+        <motion.div
+          className="input-group"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-        />
+        >
+          <div className="input-wrapper">
+            <FaUser className="input-icon" />
+            <input
+              type="email"
+              className="login-input"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+        </motion.div>
 
         <motion.div
-          className="password-wrapper"
+          className="input-group"
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          <input
-            type={showPassword ? "text" : "password"}
-            className="login-input"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <span className="eye-icon" onClick={() => setShowPassword((prev) => !prev)}>
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </span>
+          <div className="input-wrapper">
+            <FaLock className="input-icon" />
+            <input
+              type={showPassword ? "text" : "password"}
+              className="login-input"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span className="eye-icon" onClick={() => setShowPassword((prev) => !prev)}>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
         </motion.div>
 
         {error && <p className="error-message">{error}</p>}
@@ -162,40 +165,32 @@ const AnimatedLogin = () => {
         </motion.div>
 
         {loading ? (
-          <Loader />
+          <div className="loading-container">
+            <Loader />
+          </div>
         ) : (
           <motion.button
             className="login-button"
             onClick={handleLogin}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.2 }}
           >
-            Log In
+            Sign In
           </motion.button>
         )}
 
-        <div className="divider">or</div>
-
-        <motion.button
-          className="social-button google"
-          whileHover={{ scale: 1.02 }}
+        <motion.div
+          className="signup-section"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
         >
-          <FaGoogle className="social-icon" />
-          Continue with Google
-        </motion.button>
-
-        <motion.button
-          className="social-button facebook"
-          whileHover={{ scale: 1.02 }}
-        >
-          <FaFacebookF className="social-icon" />
-          Continue with Facebook
-        </motion.button>
-
-        <p className="signup-text">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="signup-link">Sign up</Link>
-        </p>
+          <p className="signup-text">
+            Don't have an account?{" "}
+            <Link to="/signup" className="signup-link">Create Account</Link>
+          </p>
+        </motion.div>
       </motion.div>
     </motion.div>
   );

@@ -1,237 +1,469 @@
-/* Import DM Sans from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap');
+/* Signup.css - Modern Glassmorphism Design */
 
-/* Base styling */
-body,
-.signup-wrapper,
-.signup-card,
-input,
-button,
-a,
-p,
-span,
-label,
-select,
-textarea {
-  font-family: 'DM Sans', sans-serif;
-  box-sizing: border-box;
-}
-
-body {
-  background-color: #f7f9fc;
-  margin: 0;
-  padding: 0;
-}
-
-/* Container */
 .signup-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
-  background-color: whitesmoke;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Card */
+.signup-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 .signup-card {
-  background-color: white;
-  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 48px;
   width: 100%;
-  max-width: 400px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  max-width: 480px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-/* Titles */
-.signup-title {
-  font-size: 24px;
-  font-weight: bold;
+.signup-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo-img {
+  width: 80px;
+  height: 80px;
   margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.signup-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .signup-subtitle {
-  font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 24px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
 }
 
-/* Input group */
+.form-section {
+  margin-bottom: 32px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
 .input-wrapper {
   position: relative;
-  margin-bottom: 16px;
-  text-align: left;
+  display: flex;
+  align-items: center;
 }
 
 .input-icon {
   position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  font-size: 16px;
+  left: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  z-index: 2;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-textarea {
+.signup-input {
   width: 100%;
-  padding: 12px 12px 12px 36px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  background-color: #fff;
+  padding: 16px 16px 16px 48px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.signup-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+.signup-input:focus {
   outline: none;
-  transition: border-color 0.3s ease;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
-input:focus,
-textarea:focus {
-  border-color: #4f46e5;
+.signup-input:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
 }
 
-/* Textarea */
-textarea {
-  height: 80px;
+.signup-textarea {
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
   resize: vertical;
-  padding-left: 12px;
+  min-height: 80px;
+  font-family: inherit;
 }
 
-/* Eye icon */
+.signup-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+.signup-textarea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
 .eye-icon {
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 16px;
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  color: #6b7280;
-  font-size: 16px;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  z-index: 2;
 }
 
-/* Password strength */
+.eye-icon:hover {
+  color: white;
+  transform: scale(1.1);
+}
+
 .password-strength {
   font-size: 12px;
-  color: #6b7280;
-  text-align: left;
-  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 8px;
+  padding-left: 16px;
 }
 
-/* Checkboxes */
-.checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #374151;
-  margin-bottom: 14px;
-  text-align: left;
+.strength-weak {
+  color: #ff6b6b;
 }
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
-  font-size: 13px;
-  color: #374151;
-  text-align: left;
+
+.strength-moderate {
+  color: #ffd93d;
+}
+
+.strength-strong {
+  color: #6bcf7f;
+}
+
+.checkbox-section {
+  margin-bottom: 16px;
 }
 
 .checkbox-label {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 12px;
   cursor: pointer;
-  width: 100%;
+  position: relative;
 }
 
-.checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #4f46e5;
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
   cursor: pointer;
-  margin: 0;
+  height: 0;
+  width: 0;
 }
 
-.checkbox-label span {
+.checkmark {
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.3s ease;
+}
+
+.checkbox-input:checked ~ .checkmark {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-color: #667eea;
+}
+
+.checkbox-input:checked ~ .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.checkbox-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
   line-height: 1.4;
 }
 
-.checkbox-label a {
-  color: #4f46e5;
+.link {
+  color: white;
   text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-.checkbox-wrapper input[type="checkbox"] {
-  accent-color: #4f46e5;
+.link:hover {
+  text-decoration: underline;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.psychologist-fields {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.signup-button {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.signup-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.signup-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button-icon {
+  font-size: 16px;
+}
+
+.signin-section {
+  text-align: center;
+}
+
+.signin-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
   margin: 0;
 }
 
-/* Checkbox links */
-.checkbox-wrapper a {
-  color: #4f46e5;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-/* Psychologist conditional section */
-.psychologist-extra {
-  margin-top: 10px;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 16px;
-  text-align: left;
-}
-
-/* Button */
-.signup-button {
-  background-color: #4f46e5;
-  color: white;
-  padding: 12px;
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.signup-button:hover {
-  background-color: #4338ca;
-}
-
-/* Error messages */
-.error-message {
-  color: #dc2626;
-  font-size: 13px;
-  margin-bottom: 10px;
-}
-
-/* Sign in link */
 .signin-link {
-  font-size: 13px;
-  margin-top: 16px;
-  color: #374151;
-}
-
-.signin-link .link {
-  color: #4f46e5;
-  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* Select field (if used) */
-select {
-  padding: 12px 12px 12px 36px;
-  border-radius: 8px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  background-color: #fff;
-  width: 100%;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
+.signin-link:hover {
+  text-decoration: underline;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .signup-wrapper {
+    padding: 16px;
+  }
+  
+  .signup-card {
+    padding: 32px 24px;
+    max-height: 95vh;
+  }
+  
+  .signup-title {
+    font-size: 24px;
+  }
+  
+  .signup-subtitle {
+    font-size: 14px;
+  }
+  
+  .logo-img {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .signup-input {
+    padding: 14px 14px 14px 44px;
+    font-size: 14px;
+  }
+  
+  .input-icon {
+    left: 14px;
+    font-size: 16px;
+  }
+  
+  .eye-icon {
+    right: 14px;
+    font-size: 16px;
+  }
+  
+  .psychologist-fields {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .signup-card {
+    padding: 24px 20px;
+  }
+  
+  .signup-input {
+    padding: 12px 12px 12px 40px;
+    font-size: 14px;
+  }
+  
+  .input-icon {
+    left: 12px;
+    font-size: 14px;
+  }
+  
+  .eye-icon {
+    right: 12px;
+    font-size: 14px;
+  }
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom Scrollbar */
+.signup-wrapper ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.signup-wrapper ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.signup-wrapper ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.signup-wrapper ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.signup-card ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.signup-card ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.signup-card ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.signup-card ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
