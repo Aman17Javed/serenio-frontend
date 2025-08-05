@@ -15,7 +15,7 @@ const Sidebar = ({ isOpen, onClose, userRole }) => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          const response = await api.get("/api/user/profile");
+          const response = await api.get("/api/profile");
           setUserProfile(response.data);
         }
       } catch (error) {
@@ -31,16 +31,10 @@ const Sidebar = ({ isOpen, onClose, userRole }) => {
     onClose();
   };
 
-  const handleProfileUpdate = async (field, value) => {
-    setLoading(true);
-    try {
-      await api.put("/api/user/profile", { [field]: value });
-      setUserProfile(prev => ({ ...prev, [field]: value }));
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+    onClose();
   };
 
   const quickActions = {
@@ -51,7 +45,8 @@ const Sidebar = ({ isOpen, onClose, userRole }) => {
       { icon: "📊", label: "Mood Tracker", path: "/mood-tracker", color: "#8B5CF6" },
       { icon: "👥", label: "Find Professionals", path: "/Professionals", color: "#EC4899" },
       { icon: "💳", label: "Payment", path: "/PaymentForm", color: "#06B6D4" },
-      { icon: "📈", label: "Sentiment Analysis", path: "/sentimentAnalysisDashboard", color: "#84CC16" },
+      { icon: "📈", label: "Sentiment Analysis", path: "/sentimentAnalysisDashboard/demo", color: "#84CC16" },
+      { icon: "📊", label: "Reports", path: "/Reports", color: "#F59E0B" },
     ],
     Psychologist: [
       { icon: "📊", label: "Dashboard", path: "/PsychologistDashboard", color: "#3B82F6" },
@@ -130,99 +125,27 @@ const Sidebar = ({ isOpen, onClose, userRole }) => {
               </div>
 
               <div className="section">
-                <h4>Profile Settings</h4>
-                <div className="profile-settings">
-                  <div className="setting-item">
-                    <label>Name</label>
-                    <input
-                      type="text"
-                      value={userProfile?.name || ""}
-                      onChange={(e) => handleProfileUpdate("name", e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
-                  
-                  <div className="setting-item">
-                    <label>Email</label>
-                    <input
-                      type="email"
-                      value={userProfile?.email || ""}
-                      onChange={(e) => handleProfileUpdate("email", e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  <div className="setting-item">
-                    <label>Phone</label>
-                    <input
-                      type="tel"
-                      value={userProfile?.phone || ""}
-                      onChange={(e) => handleProfileUpdate("phone", e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
-
-                  {userRole === "Psychologist" && (
-                    <>
-                      <div className="setting-item">
-                        <label>Specialization</label>
-                        <input
-                          type="text"
-                          value={userProfile?.specialization || ""}
-                          onChange={(e) => handleProfileUpdate("specialization", e.target.value)}
-                          disabled={loading}
-                        />
-                      </div>
-                      
-                      <div className="setting-item">
-                        <label>Experience (Years)</label>
-                        <input
-                          type="number"
-                          value={userProfile?.experience || ""}
-                          onChange={(e) => handleProfileUpdate("experience", e.target.value)}
-                          disabled={loading}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  <motion.button
-                    className="save-profile-btn"
-                    onClick={() => handleProfileUpdate("save", true)}
-                    disabled={loading}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {loading ? "Saving..." : "Save Changes"}
-                  </motion.button>
-                </div>
-              </div>
-
-              <div className="section">
                 <h4>Account</h4>
                 <div className="account-actions">
                   <button className="account-btn" onClick={() => handleNavigation("/Profile")}>
                     <span>👤</span>
-                    Full Profile
+                    Profile Settings
                   </button>
                   <button className="account-btn" onClick={() => handleNavigation("/PaymentForm")}>
                     <span>💳</span>
-                    Billing
+                    Billing & Payments
                   </button>
                   <button className="account-btn">
                     <span>🔒</span>
-                    Privacy
+                    Privacy & Security
                   </button>
                   <button className="account-btn">
                     <span>❓</span>
-                    Help
+                    Help & Support
                   </button>
                   <button 
                     className="account-btn logout-btn"
-                    onClick={() => {
-                      localStorage.removeItem("token");
-                      navigate("/login");
-                    }}
+                    onClick={handleLogout}
                   >
                     <span>🚪</span>
                     Logout

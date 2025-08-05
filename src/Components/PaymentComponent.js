@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import Loader from "./Loader";
 
-const PaymentComponent = ({ amount, currency, onSuccess }) => {
+const PaymentComponent = ({ amount, currency, demoMode = false, onSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -97,7 +97,7 @@ const PaymentComponent = ({ amount, currency, onSuccess }) => {
         transition={{ type: "spring", stiffness: 200 }}
         style={{ marginTop: "20px" }}
       >
-        {loading ? <Loader size={16} /> : "Pay & Book Appointment"}
+        {loading ? <Loader size={16} /> : demoMode ? "Demo Payment" : "Pay & Book Appointment"}
       </motion.button>
     </motion.form>
   );

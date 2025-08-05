@@ -120,7 +120,7 @@ const MyAppointments = () => {
         return;
       }
 
-      await axios.delete(`/api/appointments/cancel/${appointmentId}`, {
+      await axios.put(`/api/appointments/cancel/${appointmentId}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -193,7 +193,7 @@ const MyAppointments = () => {
                 <li>Verify the `/api/appointments/my` endpoint exists</li>
                 <li>Check backend logs for database connection issues</li>
                 <li>Ensure authentication middleware is working properly</li>
-                <li>Test the endpoint directly: <code>curl -X GET http://localhost:5000/api/appointments/my</code></li>
+                <li>Test the endpoint directly: <code>curl -X GET https://serenio-production.up.railway.app/api/appointments/my</code></li>
               </ul>
             </div>
           )}

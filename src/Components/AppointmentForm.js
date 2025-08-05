@@ -217,7 +217,7 @@ const AppointmentForm = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Authentication required.");
-      await axios.delete(`/api/appointments/cancel/${id}`, {
+      await axios.put(`/api/appointments/cancel/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAppointments((prev) => prev.filter((appt) => appt._id !== id));

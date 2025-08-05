@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api/appointments';
+const API_BASE_URL = 'https://serenio-production.up.railway.app/api/appointments';
 
 // Create axios instance with default config
 const appointmentAPI = axios.create({

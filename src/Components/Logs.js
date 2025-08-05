@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios"; // ✅ Axios added
+import axios from "../api/axios"; // ✅ Using configured axios instance
 import "./Logs.css";
 import Loader from "./Loader"; // ✅ Import the loader
 
@@ -15,8 +15,8 @@ export default function SystemMonitoringLogs() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ Replace with your real API endpoint
-    axios.get("https://your-api.com/api/logs")
+    // ✅ Using configured API endpoint
+    axios.get("/api/logs")
       .then((res) => {
         setLogsData(res.data); // expecting array of log objects
         setLoading(false);

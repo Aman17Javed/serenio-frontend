@@ -9,7 +9,7 @@ import PaymentComponent from "./PaymentComponent";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe("pk_test_51Ro39SFK7fdjAsTu02RjrN8UJX1qN1FYYKmftiHoI56HPuEGesbqH3a2P9KlrsszL5CRspkvYXgGBRvJeH1CbUHZ00oV3h7S2C"); // TODO: Replace with your real Stripe publishable key from https://dashboard.stripe.com/apikeys
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "pk_test_51Ro39SFK7fdjAsTu02RjrN8UJX1qN1FYYKmftiHoI56HPuEGesbqH3a2P9KlrsszL5CRspkvYXgGBRvJeH1CbUHZ00oV3h7S2C");
 
 const PaymentForm = () => {
   const location = useLocation();
@@ -20,6 +20,7 @@ const PaymentForm = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false); // ✅ For form submission
   const [initialLoading, setInitialLoading] = useState(true); // ✅ For page load
+  const [demoMode, setDemoMode] = useState(true); // ✅ Demo mode for projects
 
   // ✅ Show loader on initial mount
   useEffect(() => {
@@ -56,15 +57,27 @@ const PaymentForm = () => {
     setLoading(true);
 
     try {
-      await api.post("/payment", {
-        method: selectedMethod,
-        transactionId,
-        phoneNumber,
-      });
+      if (demoMode) {
+        // Demo mode - simulate payment success
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+        toast.success("✅ Demo Payment Successful! (Project Mode)", {
+          position: "top-center",
+        });
+        setTimeout(() => navigate("/my-appointments"), 2000);
+      } else {
+        // Real payment mode
+        await api.post("/payment", {
+          method: selectedMethod,
+          transactionId,
+          phoneNumber,
+        });
 
-      toast.success("✅ Payment submitted successfully!", {
-        position: "top-center",
-      });
+        toast.success("✅ Payment submitted successfully!", {
+          position: "top-center",
+        });
+        setTimeout(() => navigate("/my-appointments"), 2000);
+      }
+      
       // Reset form fields after success
       setSelectedMethod("");
       setTransactionId("");
@@ -98,6 +111,25 @@ const PaymentForm = () => {
           <p>Confirm your session booking and pay securely</p>
         </div>
 
+        {/* Demo Mode Toggle */}
+        <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffeaa7' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={demoMode}
+              onChange={(e) => setDemoMode(e.target.checked)}
+            />
+            <span style={{ fontWeight: 'bold', color: '#856404' }}>
+              🎯 Demo Mode (Perfect for Projects)
+            </span>
+          </label>
+          {demoMode && (
+            <p style={{ margin: '5px 0 0 25px', fontSize: '14px', color: '#856404' }}>
+              This simulates payment processing without real charges. Use test card: 4242 4242 4242 4242
+            </p>
+          )}
+        </div>
+
         {/* Show psychologist and session info */}
         {psychologist && (
           <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#e8f4fd', borderRadius: '5px', border: '1px solid #b3d9ff' }}>
@@ -122,8 +154,9 @@ const PaymentForm = () => {
             <PaymentComponent
               amount={sessionPrice}
               currency="pkr"
+              demoMode={demoMode}
               onSuccess={() => {
-                toast.success("Payment successful! Redirecting to your appointments...");
+                toast.success(demoMode ? "Demo Payment Successful! Redirecting..." : "Payment successful! Redirecting to your appointments...");
                 setTimeout(() => navigate("/my-appointments"), 2000);
               }}
             />
@@ -201,7 +234,7 @@ const PaymentForm = () => {
                 <Loader /> Processing...
               </>
             ) : (
-              "✅ Confirm Manual Payment"
+              demoMode ? "✅ Demo Payment" : "✅ Confirm Manual Payment"
             )}
           </button>
         </form>

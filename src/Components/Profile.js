@@ -1,32 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Import navigate
+import { useNavigate } from "react-router-dom";
 import "./ProfileSettings.css";
 import api from "../api/axios";
 import Loader from "./Loader";
-
-const initialData = {
-  name: "Sarah Johnson",
-  email: "sarah.johnson@example.com",
-  language: "English",
-  quickLang: "English",
-};
+import { toast } from "react-toastify";
 
 const ProfileSettings = () => {
-  const [formData, setFormData] = useState(initialData);
-  const [message, setMessage] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    language: "English",
+    quickLang: "English",
+  });
+  const [originalData, setOriginalData] = useState({});
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
-
     const loadProfile = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        // const res = await api.get("/api/user/profile");
-        // setFormData(res.data);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          navigate("/login");
+          return;
+        }
+
+        const response = await api.get("/api/profile");
+        const userData = response.data;
+        
+        setFormData({
+          name: userData.name || "",
+          email: userData.email || "",
+          phone: userData.phone || "",
+          language: userData.language || "English",
+          quickLang: userData.quickLang || "English",
+        });
+        setOriginalData(userData);
       } catch (error) {
         console.error("Profile load error:", error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+        } else {
+          toast.error("Failed to load profile data");
+        }
       } finally {
         setPageLoading(false);
       }
@@ -43,21 +62,45 @@ const ProfileSettings = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+    
     try {
-      await api.put("/api/user/profile", formData);
-      setMessage("✅ Profile updated successfully!");
+      const updateData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+      };
+
+      await api.put("/api/profile", updateData);
+      setOriginalData({ ...originalData, ...updateData });
+      toast.success("✅ Profile updated successfully!");
     } catch (error) {
       console.error("Profile update error:", error);
-      setMessage("❌ Failed to update profile.");
+      if (error.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else {
+        toast.error("❌ Failed to update profile. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setFormData(initialData);
-    setMessage("🔄 Changes reverted.");
+    setFormData({
+      name: originalData.name || "",
+      email: originalData.email || "",
+      phone: originalData.phone || "",
+      language: originalData.language || "English",
+      quickLang: originalData.quickLang || "English",
+    });
+    toast.info("🔄 Changes reverted.");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+    toast.info("👋 Logged out successfully");
   };
 
   if (pageLoading) {
@@ -71,17 +114,15 @@ const ProfileSettings = () => {
 
   return (
     <div className="profile-container">
-      <h2 className="heading">&larr; Profile Settings</h2>
+      <h2 className="heading">👤 Profile Settings</h2>
 
       <div className="profile-card">
         <div className="profile-header">
-          <img
-            src="https://randomuser.me/api/portraits/women/44.jpg"
-            alt="Sarah Johnson"
-            className="avatar"
-          />
-          <h3>Sarah Johnson</h3>
-          <p className="subtext">Member since 2023</p>
+          <div className="avatar">
+            {formData.name ? formData.name.charAt(0).toUpperCase() : "U"}
+          </div>
+          <h3>{formData.name || "User"}</h3>
+          <p className="subtext">Member since {new Date().getFullYear()}</p>
         </div>
 
         <form className="profile-form" onSubmit={handleSave}>
@@ -92,6 +133,8 @@ const ProfileSettings = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              placeholder="Enter your full name"
+              required
             />
           </label>
 
@@ -102,6 +145,19 @@ const ProfileSettings = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              placeholder="Enter your email"
+              required
+            />
+          </label>
+
+          <label>
+            Phone Number
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Enter your phone number"
             />
           </label>
 
@@ -112,9 +168,9 @@ const ProfileSettings = () => {
               value={formData.language}
               onChange={handleChange}
             >
-              <option>English</option>
-              <option>Urdu</option>
-              <option>French</option>
+              <option value="English">English</option>
+              <option value="Urdu">Urdu</option>
+              <option value="French">French</option>
             </select>
           </label>
 
@@ -152,8 +208,6 @@ const ProfileSettings = () => {
             </button>
           </div>
 
-          {message && <p className="status-message">{message}</p>}
-
           <div className="form-buttons">
             <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancel
@@ -174,9 +228,18 @@ const ProfileSettings = () => {
       </div>
 
       <div className="additional-settings">
-        <div className="setting-item">🔔 Notifications</div>
-        <div className="setting-item">🔒 Privacy & Security</div>
-        <div className="setting-item">❓ Help & Support</div>
+        <div className="setting-item" onClick={() => toast.info("Notifications settings coming soon!")}>
+          🔔 Notifications
+        </div>
+        <div className="setting-item" onClick={() => toast.info("Privacy settings coming soon!")}>
+          🔒 Privacy & Security
+        </div>
+        <div className="setting-item" onClick={() => toast.info("Help & support coming soon!")}>
+          ❓ Help & Support
+        </div>
+        <div className="setting-item logout-item" onClick={handleLogout}>
+          🚪 Logout
+        </div>
       </div>
     </div>
   );

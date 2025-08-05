@@ -23,6 +23,7 @@ import AppointmentDetails from "./Components/AppointmentDetails";
 import PsychologistDashboard from "./Components/PsychologistDashboard";
 import AppointmentBooking from './Components/AppointmentBooking';
 import MyAppointments from './Components/MyAppointments';
+import Reports from './Components/Reports';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -76,7 +77,14 @@ const App = () => {
             } 
           />
 
-          <Route path="/mood-tracker" element={<MoodTracker />} />
+          <Route
+            path="/mood-tracker"
+            element={
+              <PrivateRoute>
+                <MoodTracker />
+              </PrivateRoute>
+            }
+          />
 
           <Route
             path="/AdminDashboard"
@@ -139,6 +147,14 @@ const App = () => {
             element={
               <PrivateRoute>
                 <Logs />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/Reports"
+            element={
+              <PrivateRoute>
+                <Reports />
               </PrivateRoute>
             }
           />

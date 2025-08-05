@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import "./SentimentAnalysisDashboard.css";
 import api from "../api/axios";
 import Loader from "./Loader";
+import { toast } from "react-toastify";
 
 const SentimentAnalysisDashboard = () => {
   const { sessionId } = useParams();
@@ -20,6 +21,12 @@ const SentimentAnalysisDashboard = () => {
   const [emotionBreakdown, setEmotionBreakdown] = useState({});
   const [topics, setTopics] = useState([]);
   const [activeTab, setActiveTab] = useState("overview");
+  const [sessionStats, setSessionStats] = useState({
+    totalMessages: 0,
+    averageResponseTime: 0,
+    sessionDuration: 0,
+    engagementScore: 0
+  });
 
   useEffect(() => {
     console.log("SessionId from params:", sessionId);
@@ -81,6 +88,7 @@ const SentimentAnalysisDashboard = () => {
       generateSentimentTrends(logs);
       generateEmotionBreakdown(logs);
       generateTopics(logs);
+      calculateSessionStats(logs);
 
     } catch (err) {
       console.error("Error fetching sentiment analysis:", err.response?.data || err.message);
@@ -101,41 +109,22 @@ const SentimentAnalysisDashboard = () => {
           createdAt: new Date().toISOString()
         }
       ]);
+      
       generateSentimentTrends([
-        {
-          message: "Hello, I'm feeling a bit anxious today.",
-          response: "I understand. Let's talk about what's causing your anxiety.",
-          createdAt: new Date().toISOString()
-        },
-        {
-          message: "I've been having trouble sleeping lately.",
-          response: "Sleep issues can be challenging. Have you tried any relaxation techniques?",
-          createdAt: new Date().toISOString()
-        }
+        { message: "Hello, I'm feeling a bit anxious today.", createdAt: new Date().toISOString() },
+        { message: "I've been having trouble sleeping lately.", createdAt: new Date().toISOString() }
       ]);
       generateEmotionBreakdown([
-        {
-          message: "Hello, I'm feeling a bit anxious today.",
-          response: "I understand. Let's talk about what's causing your anxiety.",
-          createdAt: new Date().toISOString()
-        },
-        {
-          message: "I've been having trouble sleeping lately.",
-          response: "Sleep issues can be challenging. Have you tried any relaxation techniques?",
-          createdAt: new Date().toISOString()
-        }
+        { message: "Hello, I'm feeling a bit anxious today." },
+        { message: "I've been having trouble sleeping lately." }
       ]);
       generateTopics([
-        {
-          message: "Hello, I'm feeling a bit anxious today.",
-          response: "I understand. Let's talk about what's causing your anxiety.",
-          createdAt: new Date().toISOString()
-        },
-        {
-          message: "I've been having trouble sleeping lately.",
-          response: "Sleep issues can be challenging. Have you tried any relaxation techniques?",
-          createdAt: new Date().toISOString()
-        }
+        { message: "Hello, I'm feeling a bit anxious today." },
+        { message: "I've been having trouble sleeping lately." }
+      ]);
+      calculateSessionStats([
+        { message: "Hello, I'm feeling a bit anxious today.", createdAt: new Date().toISOString() },
+        { message: "I've been having trouble sleeping lately.", createdAt: new Date().toISOString() }
       ]);
     } finally {
       setLoading(false);
@@ -145,34 +134,30 @@ const SentimentAnalysisDashboard = () => {
   const generateSentimentTrends = (logs) => {
     const trends = logs.map((log, index) => ({
       id: index,
-      message: log.message,
       sentiment: analyzeSimpleSentiment(log.message),
       timestamp: new Date(log.createdAt).toLocaleTimeString(),
-      response: log.response
+      message: log.message.substring(0, 50) + "..."
     }));
     setSentimentTrends(trends);
   };
 
   const generateEmotionBreakdown = (logs) => {
-    const emotions = {
-      joy: 0, sadness: 0, anger: 0, fear: 0, surprise: 0, neutral: 0
-    };
-    
-    logs.forEach(log => {
+    const emotions = logs.reduce((acc, log) => {
       const emotion = detectEmotion(log.message);
-      emotions[emotion]++;
-    });
-
+      acc[emotion] = (acc[emotion] || 0) + 1;
+      return acc;
+    }, {});
     setEmotionBreakdown(emotions);
   };
 
   const generateTopics = (logs) => {
     const topicKeywords = {
-      'Mental Health': ['anxiety', 'depression', 'stress', 'therapy', 'counseling'],
+      'Anxiety': ['anxious', 'worry', 'stress', 'panic', 'fear'],
+      'Depression': ['sad', 'depressed', 'hopeless', 'worthless', 'tired'],
+      'Sleep': ['sleep', 'insomnia', 'tired', 'rest', 'bed'],
       'Relationships': ['relationship', 'partner', 'family', 'friend', 'love'],
-      'Work': ['work', 'job', 'career', 'office', 'boss', 'colleague'],
-      'Health': ['health', 'exercise', 'diet', 'sleep', 'wellness'],
-      'Personal Growth': ['goal', 'improve', 'learn', 'growth', 'development']
+      'Work': ['work', 'job', 'career', 'boss', 'colleague'],
+      'Health': ['health', 'sick', 'pain', 'doctor', 'medicine']
     };
 
     const topicCounts = {};
@@ -185,67 +170,89 @@ const SentimentAnalysisDashboard = () => {
       });
     });
 
-    setTopics(Object.entries(topicCounts).map(([topic, count]) => ({ topic, count })));
+    const sortedTopics = Object.entries(topicCounts)
+      .map(([topic, count]) => ({ topic, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+    
+    setTopics(sortedTopics);
+  };
+
+  const calculateSessionStats = (logs) => {
+    const totalMessages = logs.length;
+    const sessionDuration = logs.length > 1 
+      ? (new Date(logs[logs.length - 1].createdAt) - new Date(logs[0].createdAt)) / 1000 / 60
+      : 0;
+    const averageResponseTime = sessionDuration / totalMessages;
+    const engagementScore = Math.min(100, (totalMessages / 10) * 100);
+
+    setSessionStats({
+      totalMessages,
+      averageResponseTime: Math.round(averageResponseTime * 100) / 100,
+      sessionDuration: Math.round(sessionDuration * 100) / 100,
+      engagementScore: Math.round(engagementScore)
+    });
   };
 
   const analyzeSimpleSentiment = (text) => {
-    const lowerText = text.toLowerCase();
-    const positiveWords = ['happy', 'good', 'great', 'excellent', 'wonderful', 'amazing', 'love', 'like'];
-    const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'frustrated', 'worried'];
+    const positiveWords = ['happy', 'good', 'great', 'excellent', 'wonderful', 'amazing', 'love', 'joy'];
+    const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'anxious', 'depressed'];
     
-    const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
-    const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
+    const words = text.toLowerCase().split(' ');
+    const positiveCount = words.filter(word => positiveWords.includes(word)).length;
+    const negativeCount = words.filter(word => negativeWords.includes(word)).length;
     
-    if (positiveCount > negativeCount) return 'positive';
-    if (negativeCount > positiveCount) return 'negative';
-    return 'neutral';
+    if (positiveCount > negativeCount) return 'POSITIVE';
+    if (negativeCount > positiveCount) return 'NEGATIVE';
+    return 'NEUTRAL';
   };
 
   const detectEmotion = (text) => {
-    const lowerText = text.toLowerCase();
-    if (lowerText.includes('happy') || lowerText.includes('joy') || lowerText.includes('excited')) return 'joy';
-    if (lowerText.includes('sad') || lowerText.includes('depressed') || lowerText.includes('lonely')) return 'sadness';
-    if (lowerText.includes('angry') || lowerText.includes('furious') || lowerText.includes('mad')) return 'anger';
-    if (lowerText.includes('scared') || lowerText.includes('afraid') || lowerText.includes('worried')) return 'fear';
-    if (lowerText.includes('surprised') || lowerText.includes('shocked') || lowerText.includes('wow')) return 'surprise';
+    const emotions = {
+      joy: ['happy', 'joy', 'excited', 'great', 'wonderful'],
+      sadness: ['sad', 'depressed', 'hopeless', 'crying'],
+      anger: ['angry', 'mad', 'furious', 'hate'],
+      fear: ['scared', 'afraid', 'anxious', 'worried'],
+      surprise: ['shocked', 'surprised', 'amazed'],
+      neutral: ['okay', 'fine', 'normal']
+    };
+
+    const words = text.toLowerCase().split(' ');
+    for (const [emotion, keywords] of Object.entries(emotions)) {
+      if (keywords.some(keyword => words.includes(keyword))) {
+        return emotion;
+      }
+    }
     return 'neutral';
   };
 
   const handleGenerateReport = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`https://serenio-production.up.railway.app/api/report/session-report/${selectedSession}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate report");
-      }
-
-      const blob = await response.blob();
+      const response = await api.get(`/api/report/session-report/${selectedSession}`);
+      const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = url;
-      link.setAttribute("download", `Serenio_Report_${selectedSession}.pdf`);
+      link.download = `Serenio_Report_${selectedSession}.pdf`;
       document.body.appendChild(link);
       link.click();
-      link.remove();
-    } catch (err) {
-      console.error("Report generation failed:", err.message);
-      alert("Failed to port. Please try again.");
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success("📄 Report generated successfully!");
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast.error("❌ Failed to generate report. Please try again.");
     }
   };
 
   const getSentimentColor = (sentiment) => {
-    switch (sentiment?.toLowerCase()) {
-      case 'positive': return '#10B981';
-      case 'negative': return '#EF4444';
-      case 'neutral': return '#6B7280';
-      default: return '#6B7280';
-    }
+    const colors = {
+      POSITIVE: '#10B981',
+      NEGATIVE: '#EF4444',
+      NEUTRAL: '#6B7280',
+      'N/A': '#9CA3AF'
+    };
+    return colors[sentiment] || '#6B7280';
   };
 
   const getEmotionColor = (emotion) => {
@@ -262,48 +269,59 @@ const SentimentAnalysisDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-blue-50">
-        <Loader size={40} />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center">
+          <Loader size={40} />
+          <p className="mt-4 text-gray-600">Analyzing your conversation...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <motion.div
-      className="sentiment-dashboard min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-4 md:p-8 font-sans"
+      className="sentiment-dashboard min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8 font-sans"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
       {/* Header */}
       <motion.div
-        className="welcome-banner bg-gradient-to-r from-[#1E2A47] to-[#2D3748] text-white p-6 rounded-2xl mb-8 shadow-lg"
+        className="welcome-banner bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white p-8 rounded-3xl mb-8 shadow-2xl"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-3xl font-bold mb-2">Sentiment Analysis Dashboard</h2>
-            <p className="text-blue-100">Comprehensive insights from your conversations</p>
-            <p className="text-sm text-blue-200 mt-2">Session ID: {selectedSession}</p>
+            <h2 className="text-4xl font-bold mb-3">🧠 Sentiment Analysis Dashboard</h2>
+            <p className="text-indigo-100 text-lg">Comprehensive insights from your conversations</p>
+            <p className="text-sm text-indigo-200 mt-2">Session ID: {selectedSession}</p>
           </div>
-          <div className="flex gap-3 mt-4 md:mt-0">
+          <div className="flex gap-3 mt-6 md:mt-0">
             <motion.button
               onClick={() => navigate("/chatbot")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all border border-white/30"
             >
-              Start New Chat
+              💬 Start New Chat
             </motion.button>
             <motion.button
               onClick={() => setShowHistorical(!showHistorical)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all border border-white/30"
             >
-              {showHistorical ? 'Hide History' : 'View History'}
+              📊 {showHistorical ? 'Hide History' : 'View History'}
+            </motion.button>
+            <motion.button
+              onClick={handleGenerateReport}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg"
+            >
+              📄 Generate Report
             </motion.button>
           </div>
         </div>
@@ -313,24 +331,24 @@ const SentimentAnalysisDashboard = () => {
       <AnimatePresence>
         {showHistorical && (
           <motion.div
-            className="mb-6 bg-white rounded-xl p-6 shadow-lg"
+            className="mb-8 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Select Session</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">📚 Select Session</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {sessions.map((session) => (
                 <motion.button
                   key={session}
                   onClick={() => setSelectedSession(session)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`p-3 rounded-lg border-2 transition-all ${
+                  className={`p-4 rounded-xl border-2 transition-all ${
                     selectedSession === session
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-blue-300'
+                      ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-lg'
+                      : 'border-gray-200 bg-white/50 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50/50'
                   }`}
                 >
                   <div className="text-sm font-medium truncate">{session}</div>
@@ -343,37 +361,49 @@ const SentimentAnalysisDashboard = () => {
 
       {error && (
         <motion.div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6"
+          className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-xl mb-8 shadow-lg"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          {error} {error.includes("No chat logs") && (
-            <button
-              onClick={() => navigate("/chatbot")}
-              className="text-blue-600 underline ml-2"
-            >
-              Start Chat
-            </button>
-          )}
+          <div className="flex items-center">
+            <span className="text-xl mr-3">⚠️</span>
+            <div>
+              {error} {error.includes("No chat logs") && (
+                <button
+                  onClick={() => navigate("/chatbot")}
+                  className="text-blue-600 underline ml-2 hover:text-blue-800"
+                >
+                  Start Chat
+                </button>
+              )}
+            </div>
+          </div>
         </motion.div>
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        {['overview', 'trends', 'emotions', 'topics', 'details'].map((tab) => (
+      <div className="flex flex-wrap gap-3 mb-8">
+        {[
+          { id: 'overview', label: 'Overview', icon: '📊' },
+          { id: 'trends', label: 'Trends', icon: '📈' },
+          { id: 'emotions', label: 'Emotions', icon: '😊' },
+          { id: 'topics', label: 'Topics', icon: '🏷️' },
+          { id: 'details', label: 'Details', icon: '📋' }
+        ].map((tab) => (
           <motion.button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              activeTab === tab
-                ? 'bg-blue-500 text-white shadow-lg'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+            className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
+                : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:shadow-md'
             }`}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            <span>{tab.icon}</span>
+            {tab.label}
           </motion.button>
         ))}
       </div>
@@ -383,7 +413,7 @@ const SentimentAnalysisDashboard = () => {
         {activeTab === "overview" && (
           <motion.div
             key="overview"
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -391,63 +421,64 @@ const SentimentAnalysisDashboard = () => {
           >
             {/* Sentiment Overview */}
             <motion.div
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+              className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.3 }}
             >
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">Sentiment Overview</h3>
+              <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+                🎯 Sentiment Overview
+              </h3>
               <div className="text-center">
                 <motion.div
-                  className="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+                  className="w-32 h-32 mx-auto mb-6 rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg"
                   style={{ backgroundColor: getSentimentColor(sentiment) }}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ delay: 0.3, type: "spring" }}
                 >
-                  {sentiment?.toUpperCase() || "N/A"}
+                  {sentiment === 'POSITIVE' ? '😊' : sentiment === 'NEGATIVE' ? '😔' : '😐'}
                 </motion.div>
-                <p className="text-lg font-medium text-gray-700">Dominant Sentiment</p>
-                <p className="text-sm text-gray-500 mt-2">Based on {chatLogs.length} messages</p>
+                <h4 className="text-xl font-semibold mb-2 text-gray-800">{sentiment}</h4>
+                <p className="text-gray-600">Overall conversation sentiment</p>
               </div>
             </motion.div>
 
-            {/* Recommendation */}
+            {/* Session Statistics */}
             <motion.div
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+              className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.3 }}
             >
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">AI Recommendation</h3>
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-700 text-center leading-relaxed">{recommendation}</p>
+              <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+                📈 Session Statistics
+              </h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Total Messages</span>
+                  <span className="font-bold text-indigo-600">{sessionStats.totalMessages}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Session Duration</span>
+                  <span className="font-bold text-indigo-600">{sessionStats.sessionDuration} min</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Engagement Score</span>
+                  <span className="font-bold text-indigo-600">{sessionStats.engagementScore}%</span>
+                </div>
               </div>
             </motion.div>
 
-            {/* Quick Stats */}
+            {/* Recommendations */}
             <motion.div
-              className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+              className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.3 }}
             >
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">Quick Stats</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Total Messages:</span>
-                  <span className="font-semibold text-gray-800">{chatLogs.length}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Session Duration:</span>
-                  <span className="font-semibold text-gray-800">
-                    {chatLogs.length > 0 ? 
-                      `${Math.round((new Date(chatLogs[chatLogs.length - 1].createdAt) - new Date(chatLogs[0].createdAt)) / 60000)} min` : 
-                      'N/A'
-                    }
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Topics Discussed:</span>
-                  <span className="font-semibold text-gray-800">{topics.length}</span>
-                </div>
+              <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+                💡 Recommendations
+              </h3>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4">
+                <p className="text-gray-700 leading-relaxed">{recommendation}</p>
               </div>
             </motion.div>
           </motion.div>
@@ -456,49 +487,37 @@ const SentimentAnalysisDashboard = () => {
         {activeTab === "trends" && (
           <motion.div
             key="trends"
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <h3 className="text-xl font-semibold mb-6 text-gray-800">Sentiment Trends</h3>
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+              📈 Sentiment Trends
+            </h3>
             <div className="space-y-4">
-              {sentimentTrends.length > 0 ? (
-                sentimentTrends.map((trend, index) => (
-                  <motion.div
-                    key={index}
-                    className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <div className="flex-shrink-0">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: getSentimentColor(trend.sentiment) }}
-                      ></div>
+              {sentimentTrends.map((trend, index) => (
+                <motion.div
+                  key={trend.id}
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: getSentimentColor(trend.sentiment) }}
+                    />
+                    <div>
+                      <p className="font-medium text-gray-800">{trend.message}</p>
+                      <p className="text-sm text-gray-500">{trend.timestamp}</p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{trend.message}</p>
-                      <p className="text-xs text-gray-500">{trend.timestamp}</p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        trend.sentiment === 'positive' ? 'bg-green-100 text-green-800' :
-                        trend.sentiment === 'negative' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {trend.sentiment}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No sentiment trends available. Start a conversation to see trends.</p>
-                </div>
-              )}
+                  </div>
+                  <span className="font-semibold text-gray-700">{trend.sentiment}</span>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         )}
@@ -506,31 +525,34 @@ const SentimentAnalysisDashboard = () => {
         {activeTab === "emotions" && (
           <motion.div
             key="emotions"
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <h3 className="text-xl font-semibold mb-6 text-gray-800">Emotion Breakdown</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {Object.entries(emotionBreakdown).map(([emotion, count]) => (
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+              😊 Emotion Breakdown
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(emotionBreakdown).map(([emotion, count], index) => (
                 <motion.div
                   key={emotion}
-                  className="text-center p-4 bg-gray-50 rounded-lg"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.2 }}
+                  className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 text-center"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   <div
-                    className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center text-white font-bold"
-                    style={{ backgroundColor: getEmotionColor(emotion) }}
+                    className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl"
+                    style={{ backgroundColor: getEmotionColor(emotion) + '20' }}
                   >
-                    {count}
+                    {emotion === 'joy' ? '😊' : emotion === 'sadness' ? '😔' : 
+                     emotion === 'anger' ? '😠' : emotion === 'fear' ? '😨' : 
+                     emotion === 'surprise' ? '😲' : '😐'}
                   </div>
-                  <p className="text-sm font-medium text-gray-700 capitalize">{emotion}</p>
-                  <p className="text-xs text-gray-500">
-                    {((count / chatLogs.length) * 100).toFixed(1)}%
-                  </p>
+                  <h4 className="font-semibold text-gray-800 capitalize">{emotion}</h4>
+                  <p className="text-2xl font-bold text-indigo-600">{count}</p>
                 </motion.div>
               ))}
             </div>
@@ -540,42 +562,36 @@ const SentimentAnalysisDashboard = () => {
         {activeTab === "topics" && (
           <motion.div
             key="topics"
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <h3 className="text-xl font-semibold mb-6 text-gray-800">Topics Discussed</h3>
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+              🏷️ Discussion Topics
+            </h3>
             <div className="space-y-4">
-              {topics.length > 0 ? (
-                topics.map((topic, index) => (
-                  <motion.div
-                    key={topic.topic}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <span className="font-medium text-gray-800">{topic.topic}</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-32 bg-gray-200 rounded-full h-2">
-                        <motion.div
-                          className="bg-blue-500 h-2 rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(topic.count / Math.max(...topics.map(t => t.count))) * 100}%` }}
-                          transition={{ duration: 0.8, delay: index * 0.1 }}
-                        ></motion.div>
-                      </div>
-                      <span className="text-sm font-medium text-gray-600">{topic.count}</span>
+              {topics.map((topic, index) => (
+                <motion.div
+                  key={topic.topic}
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <span className="font-semibold text-gray-800">{topic.topic}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full"
+                        style={{ width: `${(topic.count / Math.max(...topics.map(t => t.count))) * 100}%` }}
+                      />
                     </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No topics detected. Start a conversation to see topic analysis.</p>
-                </div>
-              )}
+                    <span className="font-bold text-indigo-600">{topic.count}</span>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         )}
@@ -583,71 +599,41 @@ const SentimentAnalysisDashboard = () => {
         {activeTab === "details" && (
           <motion.div
             key="details"
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <h3 className="text-xl font-semibold mb-6 text-gray-800">Detailed Analysis</h3>
-            <div className="space-y-6">
-              <div>
-                <h4 className="text-lg font-medium text-gray-800 mb-3">Conversation Summary</h4>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-700">
-                    This session contains {chatLogs.length} messages with an overall {sentiment?.toLowerCase()} sentiment. 
-                    The conversation covers {topics.length} main topics and shows various emotional states throughout the interaction.
+            <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+              📋 Conversation Details
+            </h3>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {chatLogs.map((log, index) => (
+                <motion.div
+                  key={index}
+                  className="bg-gray-50 rounded-xl p-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <div className="mb-2">
+                    <span className="font-semibold text-indigo-600">You:</span>
+                    <p className="text-gray-800 ml-2">{log.message}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-purple-600">AI:</span>
+                    <p className="text-gray-700 ml-2">{log.response}</p>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {new Date(log.createdAt).toLocaleString()}
                   </p>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-lg font-medium text-gray-800 mb-3">Key Insights</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-blue-800 mb-2">Most Active Emotion</h5>
-                    <p className="text-blue-700">
-                      {Object.entries(emotionBreakdown).reduce((a, b) => a[1] > b[1] ? a : b)[0]}
-                    </p>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-green-800 mb-2">Primary Topic</h5>
-                    <p className="text-green-700">
-                      {topics.length > 0 ? topics[0].topic : 'No specific topic'}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Action Buttons */}
-      <motion.div
-        className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <motion.button
-          onClick={handleGenerateReport}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="generate-report-btn"
-        >
-          Generate Detailed Report
-        </motion.button>
-        
-        <motion.button
-          onClick={() => navigate("/chatbot")}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-green-500 hover:bg-green-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg transition-all duration-300"
-        >
-          Start New Conversation
-        </motion.button>
-      </motion.div>
     </motion.div>
   );
 };
