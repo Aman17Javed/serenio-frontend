@@ -204,10 +204,10 @@ const Reports = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="text-center">
+      <div className="reports-loading">
+        <div className="loading-content">
           <Loader size={40} />
-          <p className="mt-4 text-gray-600">Loading your reports...</p>
+          <p className="loading-text">Loading your reports...</p>
         </div>
       </div>
     );
@@ -215,30 +215,30 @@ const Reports = () => {
 
   return (
     <motion.div
-      className="reports-container min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8"
+      className="reports-container"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
       {/* Header */}
       <motion.div
-        className="welcome-banner bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white p-8 rounded-3xl mb-8 shadow-2xl"
+        className="reports-header"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-4xl font-bold mb-3">📊 Your Mental Health Reports</h2>
-            <p className="text-indigo-100 text-lg">Comprehensive analysis of your therapy sessions</p>
-            <p className="text-sm text-indigo-200 mt-2">{reports.length} reports available</p>
+        <div className="header-content">
+          <div className="header-text">
+            <h2 className="header-title">📊 Your Mental Health Reports</h2>
+            <p className="header-subtitle">Comprehensive analysis of your therapy sessions</p>
+            <p className="header-count">{reports.length} reports available</p>
           </div>
-          <div className="flex gap-3 mt-6 md:mt-0">
+          <div className="header-actions">
             <motion.button
               onClick={() => navigate("/chatbot")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all border border-white/30"
+              className="btn-primary"
             >
               💬 Start New Session
             </motion.button>
@@ -247,7 +247,7 @@ const Reports = () => {
       </motion.div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="filter-tabs">
         {[
           { id: 'all', label: 'All Reports', icon: '📋' },
           { id: 'positive', label: 'Positive', icon: '😊' },
@@ -259,13 +259,9 @@ const Reports = () => {
             onClick={() => setFilter(tab.id)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
-              filter === tab.id
-                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
-                : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:shadow-md'
-            }`}
+            className={`filter-tab ${filter === tab.id ? 'filter-tab-active' : ''}`}
           >
-            <span>{tab.icon}</span>
+            <span className="filter-icon">{tab.icon}</span>
             {tab.label}
           </motion.button>
         ))}
@@ -274,41 +270,41 @@ const Reports = () => {
       {/* Reports Grid */}
       {filteredReports.length === 0 ? (
         <motion.div
-          className="text-center py-16"
+          className="empty-state"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="text-6xl mb-4">📊</div>
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">No Reports Found</h3>
-          <p className="text-gray-600 mb-8">Start a conversation to generate your first report</p>
+          <div className="empty-icon">📊</div>
+          <h3 className="empty-title">No Reports Found</h3>
+          <p className="empty-description">Start a conversation to generate your first report</p>
           <motion.button
             onClick={() => navigate("/chatbot")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-8 py-4 rounded-xl font-semibold shadow-lg"
+            className="btn-primary"
           >
             💬 Start Your First Session
           </motion.button>
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="reports-grid">
           {filteredReports.map((report, index) => (
             <motion.div
               key={report.id}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl transition-all"
+              className="report-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.02 }}
             >
               {/* Report Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+              <div className="report-header">
+                <div className="report-info">
+                  <h3 className="report-title">
                     {report.name}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="report-date">
                     {new Date(report.date).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -319,7 +315,7 @@ const Reports = () => {
                   </p>
                 </div>
                 <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ml-4"
+                  className="sentiment-badge"
                   style={{ backgroundColor: getSentimentColor(report.sentiment) }}
                 >
                   {report.sentiment === 'POSITIVE' ? '😊' : report.sentiment === 'NEGATIVE' ? '🤗' : '😐'}
@@ -327,18 +323,18 @@ const Reports = () => {
               </div>
 
               {/* Report Stats */}
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Messages</span>
-                  <span className="font-semibold text-indigo-600">{report.messageCount}</span>
+              <div className="report-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Messages</span>
+                  <span className="stat-value">{report.messageCount}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Duration</span>
-                  <span className="font-semibold text-indigo-600">{report.duration}</span>
+                <div className="stat-item">
+                  <span className="stat-label">Duration</span>
+                  <span className="stat-value">{report.duration}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Sentiment</span>
-                  <span className="font-semibold" style={{ color: getSentimentColor(report.sentiment) }}>
+                <div className="stat-item">
+                  <span className="stat-label">Sentiment</span>
+                  <span className="stat-value" style={{ color: getSentimentColor(report.sentiment) }}>
                     {report.sentiment}
                   </span>
                 </div>
@@ -346,14 +342,11 @@ const Reports = () => {
 
               {/* Topics */}
               {report.topics.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600 mb-2">Topics Discussed:</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="topics-section">
+                  <p className="section-label">Topics Discussed:</p>
+                  <div className="topics-list">
                     {report.topics.map((topic, idx) => (
-                      <span
-                        key={idx}
-                        className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium"
-                      >
+                      <span key={idx} className="topic-tag">
                         {topic}
                       </span>
                     ))}
@@ -363,14 +356,11 @@ const Reports = () => {
 
               {/* Emotions */}
               {report.emotions.length > 0 && (
-                <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-2">Primary Emotions:</p>
-                  <div className="flex gap-2">
+                <div className="emotions-section">
+                  <p className="section-label">Primary Emotions:</p>
+                  <div className="emotions-list">
                     {report.emotions.map((emotion, idx) => (
-                      <span
-                        key={idx}
-                        className="flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium"
-                      >
+                      <span key={idx} className="emotion-tag">
                         {getEmotionIcon(emotion)} {emotion}
                       </span>
                     ))}
@@ -379,12 +369,12 @@ const Reports = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="action-buttons">
                 <motion.button
                   onClick={() => handleViewAnalysis(report)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-2 px-4 rounded-xl font-medium text-sm transition-all"
+                  className="btn-view-analysis"
                 >
                   📊 View Analysis
                 </motion.button>
@@ -392,7 +382,7 @@ const Reports = () => {
                   onClick={() => handleGeneratePDF(report)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 px-4 rounded-xl font-medium text-sm transition-all"
+                  className="btn-download-pdf"
                 >
                   📄 Download PDF
                 </motion.button>
@@ -405,36 +395,36 @@ const Reports = () => {
       {/* Summary Stats */}
       {reports.length > 0 && (
         <motion.div
-          className="mt-12 bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20"
+          className="summary-stats"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
-          <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+          <h3 className="summary-title">
             📈 Reports Summary
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600 mb-2">{reports.length}</div>
-              <div className="text-gray-600">Total Reports</div>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-number">{reports.length}</div>
+              <div className="stat-label">Total Reports</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">
+            <div className="stat-card">
+              <div className="stat-number positive">
                 {reports.filter(r => r.sentiment === 'POSITIVE').length}
               </div>
-              <div className="text-gray-600">Positive Sessions</div>
+              <div className="stat-label">Positive Sessions</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
+            <div className="stat-card">
+              <div className="stat-number supportive">
                 {reports.filter(r => r.sentiment === 'NEGATIVE').length}
               </div>
-              <div className="text-gray-600">Supportive Sessions</div>
+              <div className="stat-label">Supportive Sessions</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">
+            <div className="stat-card">
+              <div className="stat-number neutral">
                 {Math.round(reports.reduce((acc, r) => acc + r.messageCount, 0) / reports.length)}
               </div>
-              <div className="text-gray-600">Avg Messages</div>
+              <div className="stat-label">Avg Messages</div>
             </div>
           </div>
         </motion.div>
