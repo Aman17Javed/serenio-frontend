@@ -17,7 +17,6 @@ const Index = () => {
       <nav className="navbar">
         <div className="nav-container">
           <div className="nav-logo">
-            <img src={require("../assets/logo.png")} alt="Serenio" className="logo" />
             <span className="logo-text">Serenio</span>
           </div>
           
