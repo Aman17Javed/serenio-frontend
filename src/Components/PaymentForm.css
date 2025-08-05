@@ -134,3 +134,66 @@
   margin-top: 16px;
   text-align: center;
 }
+
+/* Demo Toggle Styles */
+.demo-toggle {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.demo-toggle label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4A5568;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #F7FAFC;
+  border: 1px solid #E2E8F0;
+  transition: all 0.2s ease;
+}
+
+.demo-toggle label:hover {
+  background: #EDF2F7;
+}
+
+.demo-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #2C7A7B;
+}
+
+/* Center all content */
+.payment-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.payment-header,
+.payment-methods,
+.form-group,
+.submit-btn {
+  width: 100%;
+  max-width: 350px;
+}
+
+/* Improve spacing and alignment */
+.payment-header {
+  margin-bottom: 24px;
+}
+
+.payment-methods {
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.submit-btn {
+  margin-top: 16px;
+}

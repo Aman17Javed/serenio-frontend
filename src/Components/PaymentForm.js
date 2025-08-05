@@ -60,7 +60,7 @@ const PaymentForm = () => {
       if (demoMode) {
         // Demo mode - simulate payment success
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-        toast.success("✅ Demo Payment Successful! (Project Mode)", {
+        toast.success("Payment successful!", {
           position: "top-center",
         });
         setTimeout(() => navigate("/my-appointments"), 2000);
@@ -72,7 +72,7 @@ const PaymentForm = () => {
           phoneNumber,
         });
 
-        toast.success("✅ Payment submitted successfully!", {
+        toast.success("Payment submitted successfully!", {
           position: "top-center",
         });
         setTimeout(() => navigate("/my-appointments"), 2000);
@@ -84,7 +84,7 @@ const PaymentForm = () => {
       setPhoneNumber("");
     } catch (err) {
       console.error("Payment error:", err);
-      toast.error("❌ Failed to submit payment. Please try again.", {
+      toast.error("Failed to submit payment. Please try again.", {
         position: "top-center",
       });
     } finally {
@@ -111,23 +111,16 @@ const PaymentForm = () => {
           <p>Confirm your session booking and pay securely</p>
         </div>
 
-        {/* Demo Mode Toggle */}
-        <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '5px', border: '1px solid #ffeaa7' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+        {/* Demo Mode Toggle - Simplified */}
+        <div className="demo-toggle">
+          <label>
             <input
               type="checkbox"
               checked={demoMode}
               onChange={(e) => setDemoMode(e.target.checked)}
             />
-            <span style={{ fontWeight: 'bold', color: '#856404' }}>
-              🎯 Demo Mode (Perfect for Projects)
-            </span>
+            <span>Demo Mode</span>
           </label>
-          {demoMode && (
-            <p style={{ margin: '5px 0 0 25px', fontSize: '14px', color: '#856404' }}>
-              This simulates payment processing without real charges. Use test card: 4242 4242 4242 4242
-            </p>
-          )}
         </div>
 
         {/* Show psychologist and session info */}
@@ -156,7 +149,7 @@ const PaymentForm = () => {
               currency="pkr"
               demoMode={demoMode}
               onSuccess={() => {
-                toast.success(demoMode ? "Demo Payment Successful! Redirecting..." : "Payment successful! Redirecting to your appointments...");
+                toast.success("Payment successful! Redirecting to your appointments...");
                 setTimeout(() => navigate("/my-appointments"), 2000);
               }}
             />
@@ -234,7 +227,7 @@ const PaymentForm = () => {
                 <Loader /> Processing...
               </>
             ) : (
-              demoMode ? "✅ Demo Payment" : "✅ Confirm Manual Payment"
+              demoMode ? "Demo Payment" : "Confirm Manual Payment"
             )}
           </button>
         </form>

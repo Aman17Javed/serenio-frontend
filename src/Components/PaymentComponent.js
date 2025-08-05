@@ -97,7 +97,7 @@ const PaymentComponent = ({ amount, currency, demoMode = false, onSuccess }) => 
         transition={{ type: "spring", stiffness: 200 }}
         style={{ marginTop: "20px" }}
       >
-        {loading ? <Loader size={16} /> : demoMode ? "Demo Payment" : "Pay & Book Appointment"}
+        {loading ? <Loader size={16} /> : "Pay & Book Appointment"}
       </motion.button>
     </motion.form>
   );
