@@ -340,33 +340,37 @@ const Reports = () => {
                 </div>
               </div>
 
-              {/* Topics */}
-              {report.topics.length > 0 && (
-                <div className="topics-section">
-                  <p className="section-label">Topics Discussed:</p>
-                  <div className="topics-list">
-                    {report.topics.map((topic, idx) => (
+              {/* Topics - Always show this section */}
+              <div className="topics-section">
+                <p className="section-label">Topics Discussed:</p>
+                <div className="topics-list">
+                  {report.topics && report.topics.length > 0 ? (
+                    report.topics.map((topic, idx) => (
                       <span key={idx} className="topic-tag">
                         {topic}
                       </span>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <span className="topic-tag no-data">No specific topics</span>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {/* Emotions */}
-              {report.emotions.length > 0 && (
-                <div className="emotions-section">
-                  <p className="section-label">Primary Emotions:</p>
-                  <div className="emotions-list">
-                    {report.emotions.map((emotion, idx) => (
+              {/* Emotions - Always show this section */}
+              <div className="emotions-section">
+                <p className="section-label">Primary Emotions:</p>
+                <div className="emotions-list">
+                  {report.emotions && report.emotions.length > 0 ? (
+                    report.emotions.map((emotion, idx) => (
                       <span key={idx} className="emotion-tag">
                         {getEmotionIcon(emotion)} {emotion}
                       </span>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <span className="emotion-tag no-data">😐 Neutral</span>
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Action Buttons */}
               <div className="action-buttons">

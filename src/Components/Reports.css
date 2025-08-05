@@ -145,6 +145,7 @@
   grid-template-columns: 1fr;
   gap: 24px;
   margin-bottom: 48px;
+  align-items: stretch;
 }
 
 /* Report Card */
@@ -156,6 +157,9 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .report-card:hover {
@@ -169,6 +173,7 @@
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .report-info {
@@ -185,6 +190,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 50px;
 }
 
 .report-date {
@@ -209,6 +215,7 @@
 /* Report Stats */
 .report-stats {
   margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .stat-item {
@@ -236,6 +243,7 @@
 /* Topics Section */
 .topics-section {
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .section-label {
@@ -248,6 +256,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  min-height: 32px;
 }
 
 .topic-tag {
@@ -259,14 +268,22 @@
   font-weight: 600;
 }
 
+.topic-tag.no-data {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  font-style: italic;
+}
+
 /* Emotions Section */
 .emotions-section {
   margin-bottom: 24px;
+  flex-shrink: 0;
 }
 
 .emotions-list {
   display: flex;
   gap: 8px;
+  min-height: 32px;
 }
 
 .emotion-tag {
@@ -281,10 +298,18 @@
   font-weight: 600;
 }
 
+.emotion-tag.no-data {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+  font-style: italic;
+}
+
 /* Action Buttons */
 .action-buttons {
   display: flex;
   gap: 12px;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .btn-view-analysis {
@@ -299,6 +324,11 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .btn-view-analysis:hover {
@@ -318,6 +348,11 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .btn-download-pdf:hover {
@@ -413,6 +448,7 @@
   
   .reports-grid {
     grid-template-columns: repeat(2, 1fr);
+    align-items: stretch;
   }
   
   .stats-grid {
@@ -423,6 +459,7 @@
 @media (min-width: 1024px) {
   .reports-grid {
     grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
   }
 }
 
