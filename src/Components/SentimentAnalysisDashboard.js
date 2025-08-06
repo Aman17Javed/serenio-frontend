@@ -386,7 +386,7 @@ const SentimentAnalysisDashboard = () => {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap gap-3 mb-8">
+      <div className="tab-navigation">
         {[
           { id: 'overview', label: 'Overview', icon: '📊' },
           { id: 'trends', label: 'Trends', icon: '📈' },
@@ -399,14 +399,10 @@ const SentimentAnalysisDashboard = () => {
             onClick={() => setActiveTab(tab.id)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${
-              activeTab === tab.id
-                ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
-                : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-white hover:shadow-md'
-            }`}
+            className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
           >
-            <span>{tab.icon}</span>
-            {tab.label}
+            <span className="tab-icon">{tab.icon}</span>
+            <span className="tab-label">{tab.label}</span>
           </motion.button>
         ))}
       </div>
