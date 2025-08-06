@@ -119,19 +119,19 @@ html, body {
 }
 
 .message-sentiment {
-  margin-top: 8px;
+  margin-top: 6px;
   display: flex;
   justify-content: flex-end;
 }
 
 .sentiment-badge {
-  padding: 2px 4px;
-  border-radius: 6px;
-  font-size: 7px;
+  padding: 1px 3px;
+  border-radius: 4px;
+  font-size: 6px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.2px;
-  opacity: 0.7;
+  letter-spacing: 0.1px;
+  opacity: 0.6;
   transition: all 0.2s ease;
 }
 

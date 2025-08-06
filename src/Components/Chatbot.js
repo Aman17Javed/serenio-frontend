@@ -9,20 +9,47 @@ import RealTimeSentiment from "./RealTimeSentiment";
 
 const analyzeSentiment = async (text) => {
   try {
+    console.log("🔍 Analyzing sentiment for:", text.substring(0, 50) + "...");
     const response = await api.post("/api/openai/sentiment", {
       messages: [{ role: "user", content: text }]
     });
     const analysis = response.data;
+    console.log("📊 Sentiment analysis result:", analysis.sentiment, "Confidence:", analysis.confidence);
     return analysis.sentiment || "NEUTRAL";
   } catch (error) {
     console.error("Error analyzing sentiment:", error);
-    // Fallback to simple analysis
+    // Enhanced fallback sentiment analysis
     const lowerText = text.toLowerCase();
-    if (lowerText.includes("happy") || lowerText.includes("great") || lowerText.includes("good")) {
+    
+    // Positive indicators
+    const positiveWords = ["happy", "great", "good", "excellent", "amazing", "wonderful", "fantastic", "love", "joy", "excited", "grateful", "thankful", "better", "improved", "fantastic", "awesome", "perfect", "brilliant", "outstanding", "superb"];
+    const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
+    
+    // Negative indicators
+    const negativeWords = ["sad", "bad", "terrible", "awful", "hate", "angry", "frustrated", "depressed", "anxious", "worried", "stressed", "upset", "disappointed", "hurt", "pain", "suffering", "difficult", "hard", "struggle", "problem", "issue", "wrong", "fail", "failed", "worst", "horrible"];
+    const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
+    
+    // Neutral indicators
+    const neutralWords = ["okay", "fine", "normal", "usual", "regular", "standard", "average", "typical"];
+    const neutralCount = neutralWords.filter(word => lowerText.includes(word)).length;
+    
+    console.log("📝 Fallback analysis - Positive:", positiveCount, "Negative:", negativeCount, "Neutral:", neutralCount);
+    
+    if (positiveCount > negativeCount && positiveCount > 0) {
       return "POSITIVE";
-    } else if (lowerText.includes("sad") || lowerText.includes("bad") || lowerText.includes("why")) {
+    } else if (negativeCount > positiveCount && negativeCount > 0) {
       return "NEGATIVE";
+    } else if (neutralCount > 0) {
+      return "NEUTRAL";
     }
+    
+    // If no keywords found, analyze sentence structure
+    if (text.includes("?")) {
+      return "NEUTRAL"; // Questions are typically neutral
+    } else if (text.includes("!")) {
+      return positiveCount >= negativeCount ? "POSITIVE" : "NEGATIVE";
+    }
+    
     return "NEUTRAL";
   }
 };
@@ -93,6 +120,7 @@ const Chatbot = () => {
 
     // Analyze sentiment using OpenAI API
     const userSentiment = await analyzeSentiment(currentInput);
+    console.log("💭 Final sentiment for message:", userSentiment);
     
     // Update the user message with sentiment
     setMessages((prev) => 
@@ -102,6 +130,8 @@ const Chatbot = () => {
           : msg
       )
     );
+    
+    console.log("✅ Message updated with sentiment:", userSentiment);
 
     try {
       // Send message to chatbot API (which will save to database)
