@@ -3,19 +3,20 @@
 .my-appointments {
   min-height: 100vh;
   background: #ffffff;
-  padding: 120px 20px 40px 20px;
+  padding: 120px 2rem 2rem 2rem;
   font-family: "DM Sans", sans-serif;
 }
 
 .appointments-container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .appointments-header {
   text-align: center;
-  margin-bottom: 40px;
-  padding: 0 20px;
+  margin-bottom: 2rem;
+  padding: 0;
 }
 
 .appointments-header h1 {
@@ -37,10 +38,10 @@
 
 .appointments-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
-  padding: 0 20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  padding: 0;
 }
 
 .stat-card {
@@ -75,8 +76,8 @@
 .appointments-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 0 20px;
+  gap: 1.5rem;
+  padding: 0;
 }
 
 .appointment-card {
@@ -330,7 +331,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .my-appointments {
-    padding: 100px 16px 32px 16px;
+    padding: 100px 1rem 2rem 1rem;
   }
   
   .appointments-header h1 {
@@ -339,11 +340,11 @@
   
   .appointments-stats {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 1rem;
   }
   
   .stat-card {
-    padding: 20px;
+    padding: 1.25rem;
   }
   
   .stat-number {
@@ -366,21 +367,26 @@
   }
   
   .appointment-card {
-    padding: 20px;
+    padding: 1.25rem;
   }
 }
 
 @media (max-width: 480px) {
+  .my-appointments {
+    padding: 100px 0.75rem 1.5rem 0.75rem;
+  }
+  
   .appointments-header h1 {
     font-size: 1.75rem;
   }
   
   .appointments-stats {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
   
   .appointment-card {
-    padding: 16px;
+    padding: 1rem;
   }
   
   .psychologist-info h3 {
