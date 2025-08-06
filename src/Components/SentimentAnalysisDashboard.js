@@ -148,8 +148,17 @@ const SentimentAnalysisDashboard = () => {
 
   const generateSentimentTrends = async (logs) => {
     try {
+      // Ensure we only analyze logs from the current session
+      const sessionLogs = logs.filter(log => log.sessionId === selectedSession);
+      console.log("📈 Generating sentiment trends for session:", selectedSession, "Logs:", sessionLogs.length);
+      
+      if (sessionLogs.length === 0) {
+        setSentimentTrends([]);
+        return;
+      }
+
       // Use OpenAI API for sentiment analysis
-      const messages = logs.map(log => ({
+      const messages = sessionLogs.map(log => ({
         role: "user",
         content: log.message
       }));
@@ -157,7 +166,7 @@ const SentimentAnalysisDashboard = () => {
       const response = await api.post("/api/openai/sentiment", { messages });
       const analysis = response.data;
       
-      const trends = logs.map((log, index) => ({
+      const trends = sessionLogs.map((log, index) => ({
         id: index,
         sentiment: analysis.sentiment || "NEUTRAL",
         timestamp: new Date(log.createdAt).toLocaleTimeString(),
@@ -167,7 +176,8 @@ const SentimentAnalysisDashboard = () => {
     } catch (error) {
       console.error("Error generating sentiment trends:", error);
       // Fallback to simple analysis
-      const trends = logs.map((log, index) => ({
+      const sessionLogs = logs.filter(log => log.sessionId === selectedSession);
+      const trends = sessionLogs.map((log, index) => ({
         id: index,
         sentiment: "NEUTRAL",
         timestamp: new Date(log.createdAt).toLocaleTimeString(),
@@ -179,8 +189,17 @@ const SentimentAnalysisDashboard = () => {
 
   const generateEmotionBreakdown = async (logs) => {
     try {
+      // Ensure we only analyze logs from the current session
+      const sessionLogs = logs.filter(log => log.sessionId === selectedSession);
+      console.log("😊 Generating emotion breakdown for session:", selectedSession, "Logs:", sessionLogs.length);
+      
+      if (sessionLogs.length === 0) {
+        setEmotionBreakdown({});
+        return;
+      }
+
       // Use OpenAI API for emotion analysis
-      const messages = logs.map(log => ({
+      const messages = sessionLogs.map(log => ({
         role: "user",
         content: log.message
       }));
@@ -193,7 +212,7 @@ const SentimentAnalysisDashboard = () => {
       if (analysis.emotions) {
         Object.entries(analysis.emotions).forEach(([emotion, score]) => {
           if (score > 0.1) { // Only count emotions with significant scores
-            emotions[emotion] = Math.round(score * logs.length);
+            emotions[emotion] = Math.round(score * sessionLogs.length);
           }
         });
       }
@@ -202,7 +221,8 @@ const SentimentAnalysisDashboard = () => {
     } catch (error) {
       console.error("Error generating emotion breakdown:", error);
       // Fallback to simple analysis
-      const emotions = logs.reduce((acc, log) => {
+      const sessionLogs = logs.filter(log => log.sessionId === selectedSession);
+      const emotions = sessionLogs.reduce((acc, log) => {
         const emotion = "neutral";
         acc[emotion] = (acc[emotion] || 0) + 1;
         return acc;
@@ -213,8 +233,17 @@ const SentimentAnalysisDashboard = () => {
 
   const generateTopics = async (logs) => {
     try {
+      // Ensure we only analyze logs from the current session
+      const sessionLogs = logs.filter(log => log.sessionId === selectedSession);
+      console.log("🏷️ Generating topics for session:", selectedSession, "Logs:", sessionLogs.length);
+      
+      if (sessionLogs.length === 0) {
+        setTopics([]);
+        return;
+      }
+
       // Use OpenAI API for topic analysis
-      const messages = logs.map(log => ({
+      const messages = sessionLogs.map(log => ({
         role: "user",
         content: log.message
       }));
@@ -226,7 +255,7 @@ const SentimentAnalysisDashboard = () => {
         // Convert OpenAI topics to our format
         const topics = analysis.topics.map(topic => ({
           topic: topic.topic,
-          count: Math.round(topic.confidence * logs.length)
+          count: Math.round(topic.confidence * sessionLogs.length)
         }));
         setTopics(topics);
       } else {
@@ -241,7 +270,7 @@ const SentimentAnalysisDashboard = () => {
         };
 
         const topicCounts = {};
-        logs.forEach(log => {
+        sessionLogs.forEach(log => {
           const message = log.message.toLowerCase();
           Object.entries(topicKeywords).forEach(([topic, keywords]) => {
             if (keywords.some(keyword => message.includes(keyword))) {
@@ -260,6 +289,7 @@ const SentimentAnalysisDashboard = () => {
     } catch (error) {
       console.error("Error generating topics:", error);
       // Fallback to keyword-based topic detection
+      const sessionLogs = logs.filter(log => log.sessionId === selectedSession);
       const topicKeywords = {
         'Anxiety': ['anxious', 'worry', 'stress', 'panic', 'fear'],
         'Depression': ['sad', 'depressed', 'hopeless', 'worthless', 'tired'],
@@ -270,7 +300,7 @@ const SentimentAnalysisDashboard = () => {
       };
 
       const topicCounts = {};
-      logs.forEach(log => {
+      sessionLogs.forEach(log => {
         const message = log.message.toLowerCase();
         Object.entries(topicKeywords).forEach(([topic, keywords]) => {
           if (keywords.some(keyword => message.includes(keyword))) {
@@ -413,7 +443,10 @@ const SentimentAnalysisDashboard = () => {
           <div>
             <h2 className="text-4xl font-bold mb-3">🧠 Sentiment Analysis Dashboard</h2>
             <p className="text-indigo-100 text-lg">Comprehensive insights from your conversations</p>
-            <p className="text-sm text-indigo-200 mt-2">Session ID: {selectedSession}</p>
+                         <p className="text-sm text-indigo-200 mt-2">
+               Session ID: {selectedSession} | 
+               Messages: {chatLogs.filter(log => log.sessionId === selectedSession).length}
+             </p>
           </div>
           <div className="button-container">
             <motion.button
@@ -724,29 +757,31 @@ const SentimentAnalysisDashboard = () => {
             <h3 className="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
               📋 Conversation Details
             </h3>
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {chatLogs.map((log, index) => (
-                <motion.div
-                  key={index}
-                  className="bg-gray-50 rounded-xl p-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <div className="mb-2">
-                    <span className="font-semibold text-indigo-600">You:</span>
-                    <p className="text-gray-800 ml-2">{log.message}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-purple-600">AI:</span>
-                    <p className="text-gray-700 ml-2">{log.response}</p>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    {new Date(log.createdAt).toLocaleString()}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+                         <div className="space-y-4 max-h-96 overflow-y-auto">
+               {chatLogs
+                 .filter(log => log.sessionId === selectedSession)
+                 .map((log, index) => (
+                   <motion.div
+                     key={index}
+                     className="bg-gray-50 rounded-xl p-4"
+                     initial={{ opacity: 0, y: 10 }}
+                     animate={{ opacity: 1, y: 0 }}
+                     transition={{ delay: index * 0.05 }}
+                   >
+                     <div className="mb-2">
+                       <span className="font-semibold text-indigo-600">You:</span>
+                       <p className="text-gray-800 ml-2">{log.message}</p>
+                     </div>
+                     <div>
+                       <span className="font-semibold text-purple-600">AI:</span>
+                       <p className="text-gray-700 ml-2">{log.response}</p>
+                     </div>
+                     <p className="text-xs text-gray-500 mt-2">
+                       {new Date(log.createdAt).toLocaleString()}
+                     </p>
+                   </motion.div>
+                 ))}
+             </div>
           </motion.div>
         )}
       </AnimatePresence>
