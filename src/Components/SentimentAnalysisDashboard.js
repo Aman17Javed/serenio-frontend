@@ -310,7 +310,13 @@ const SentimentAnalysisDashboard = () => {
 
   const handleGenerateReport = async () => {
     try {
-      const response = await api.get(`/api/report/session-report/${selectedSession}`);
+      console.log("Generating report for session:", selectedSession);
+      const response = await api.get(`/api/report/session-report/${selectedSession}`, {
+        responseType: 'blob' // Important: Set response type to blob for PDF
+      });
+      
+      console.log("Report response received:", response);
+      
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -323,7 +329,12 @@ const SentimentAnalysisDashboard = () => {
       toast.success("📄 Report generated successfully!");
     } catch (error) {
       console.error("Error generating report:", error);
-      toast.error("❌ Failed to generate report. Please try again.");
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        toast.error(`❌ Failed to generate report: ${error.response.data.message || 'Unknown error'}`);
+      } else {
+        toast.error("❌ Failed to generate report. Please try again.");
+      }
     }
   };
 
