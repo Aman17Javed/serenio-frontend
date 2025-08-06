@@ -41,12 +41,104 @@ const SentimentAnalysisDashboard = () => {
     try {
       const response = await api.get("/api/chatlogs/sessions");
       console.log("Sessions response:", response.data);
-      setSessions(response.data);
+      
+      // Create meaningful session objects with names
+      const sessionsWithNames = await Promise.all(
+        response.data.map(async (sessionId) => {
+          try {
+            // Fetch first few messages to create a meaningful name
+            const sessionLogsRes = await api.get(`/api/chatlogs/session/${sessionId}`);
+            const sessionLogs = sessionLogsRes.data.filter(log => log.sessionId === sessionId);
+            
+            if (sessionLogs.length > 0) {
+              const firstMessage = sessionLogs[0].message;
+              const sessionDate = new Date(sessionLogs[0].createdAt);
+              
+              // Create a meaningful name based on first message and date
+              const meaningfulName = generateSessionName(firstMessage, sessionDate, sessionLogs.length);
+              
+              return {
+                id: sessionId,
+                name: meaningfulName,
+                date: sessionDate,
+                messageCount: sessionLogs.length,
+                firstMessage: firstMessage.slice(0, 50) + (firstMessage.length > 50 ? '...' : '')
+              };
+            } else {
+              return {
+                id: sessionId,
+                name: `Session ${sessionId.slice(0, 8)}`,
+                date: new Date(),
+                messageCount: 0,
+                firstMessage: 'No messages'
+              };
+            }
+          } catch (error) {
+            console.error("Error fetching session details:", error);
+            return {
+              id: sessionId,
+              name: `Session ${sessionId.slice(0, 8)}`,
+              date: new Date(),
+              messageCount: 0,
+              firstMessage: 'Unable to load'
+            };
+          }
+        })
+      );
+      
+      // Sort by date (newest first)
+      sessionsWithNames.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      setSessions(sessionsWithNames);
     } catch (err) {
       console.error("Error fetching sessions:", err);
       // Set some default sessions for testing
-      setSessions([sessionId || "default-session"]);
+      setSessions([{
+        id: sessionId || "default-session",
+        name: "Current Session",
+        date: new Date(),
+        messageCount: 0,
+        firstMessage: 'No messages'
+      }]);
     }
+  };
+
+  // Helper function to generate meaningful session names
+  const generateSessionName = (firstMessage, date, messageCount) => {
+    const dateStr = date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    // Extract key topics/emotions from first message
+    const lowerMessage = firstMessage.toLowerCase();
+    let topic = '';
+    
+    if (lowerMessage.includes('stress') || lowerMessage.includes('anxious') || lowerMessage.includes('anxiety')) {
+      topic = '🧠 Stress & Anxiety';
+    } else if (lowerMessage.includes('sad') || lowerMessage.includes('depressed') || lowerMessage.includes('depression')) {
+      topic = '😢 Mood Support';
+    } else if (lowerMessage.includes('relationship') || lowerMessage.includes('partner') || lowerMessage.includes('family')) {
+      topic = '💕 Relationships';
+    } else if (lowerMessage.includes('work') || lowerMessage.includes('job') || lowerMessage.includes('career')) {
+      topic = '💼 Work & Career';
+    } else if (lowerMessage.includes('sleep') || lowerMessage.includes('tired') || lowerMessage.includes('insomnia')) {
+      topic = '😴 Sleep Issues';
+    } else if (lowerMessage.includes('angry') || lowerMessage.includes('frustrated') || lowerMessage.includes('anger')) {
+      topic = '😤 Anger Management';
+    } else if (lowerMessage.includes('confidence') || lowerMessage.includes('self-esteem') || lowerMessage.includes('worth')) {
+      topic = '💪 Self-Confidence';
+    } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('help')) {
+      topic = '💬 General Chat';
+    } else {
+      // Use first few words as topic
+      const words = firstMessage.split(' ').slice(0, 2).join(' ');
+      topic = `💭 ${words.charAt(0).toUpperCase() + words.slice(1)}`;
+    }
+    
+    return `${topic} - ${dateStr} (${messageCount} msgs)`;
   };
 
   const fetchSentimentAnalysis = async () => {
@@ -494,17 +586,34 @@ const SentimentAnalysisDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {sessions.map((session) => (
                 <motion.button
-                  key={session}
-                  onClick={() => setSelectedSession(session)}
+                  key={session.id || session}
+                  onClick={() => setSelectedSession(session.id || session)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    selectedSession === session
+                  className={`p-4 rounded-xl border-2 transition-all text-left ${
+                    selectedSession === (session.id || session)
                       ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-lg'
                       : 'border-gray-200 bg-white/50 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50/50'
                   }`}
                 >
-                  <div className="text-sm font-medium truncate">{session}</div>
+                  <div className="font-semibold text-sm mb-2 truncate">
+                    {session.name || session}
+                  </div>
+                  {session.firstMessage && (
+                    <div className="text-xs text-gray-500 mb-2 line-clamp-2">
+                      "{session.firstMessage}"
+                    </div>
+                  )}
+                  {session.date && (
+                    <div className="text-xs text-gray-400">
+                      {new Date(session.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  )}
                 </motion.button>
               ))}
             </div>

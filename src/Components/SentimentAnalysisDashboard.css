@@ -3,7 +3,7 @@
 /* Modern Sentiment Analysis Dashboard Styles */
 .sentiment-dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  background: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #1e293b;
   position: relative;
@@ -13,10 +13,10 @@
 
 /* Glassmorphism Base Styles */
 .glass-effect {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(248, 250, 252, 0.8);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 /* Header Banner */
@@ -71,14 +71,11 @@
 
 /* Session Selector */
 .sentiment-dashboard .bg-white\/80 {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
+  background: #ffffff;
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
   margin-bottom: 2rem;
 }
 
@@ -645,39 +642,16 @@
 }
 
 /* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .sentiment-dashboard {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-    color: #f1f5f9;
-  }
-  
-  .sentiment-dashboard .bg-white\/80 {
-    background: rgba(30, 41, 59, 0.8);
-    color: #f1f5f9;
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .sentiment-dashboard .text-gray-800 {
-    color: #f1f5f9;
-  }
-  
-  .sentiment-dashboard .text-gray-600 {
-    color: #cbd5e1;
-  }
-  
-  .sentiment-dashboard .text-gray-500 {
-    color: #94a3b8;
-  }
-  
-  .sentiment-dashboard .bg-gray-50 {
-    background: linear-gradient(135deg, #334155 0%, #475569 100%);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .sentiment-dashboard .border-gray-200 {
-    background: rgba(30, 41, 59, 0.9);
-    border-color: rgba(255, 255, 255, 0.1);
-  }
+/* Removed dark mode to ensure consistent white background theme */
+
+/* Utility Classes */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+  max-height: 2.6em;
 }
 
 /* Hover Effects */
@@ -820,16 +794,16 @@
 
 /* Secondary Button (View History) */
 .secondary-button {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #334155;
+  border: 1px solid #cbd5e1;
 }
 
 .secondary-button:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
   transform: translateY(-2px);
   box-shadow: 
-    0 8px 25px rgba(255, 255, 255, 0.2),
+    0 8px 25px rgba(51, 65, 85, 0.15),
     0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
