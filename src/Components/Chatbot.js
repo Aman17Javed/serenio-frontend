@@ -164,42 +164,6 @@ const Chatbot = () => {
         isVisible={showSentiment && messages.length > 1}
       />
       
-      <div className="chatbot-header">
-        <div className="chatbot-title">
-          <h2>Serenio AI</h2>
-          <p>Your Personal Mental Health Assistant</p>
-        </div>
-        <div className="chatbot-actions">
-          <motion.button
-            onClick={() => setShowSentiment(!showSentiment)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`sentiment-toggle-btn ${showSentiment ? 'active' : ''}`}
-            title="Toggle Sentiment Analysis"
-          >
-            📊
-          </motion.button>
-          <motion.button
-            onClick={handleClearChat}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="clear-chat-btn"
-            title="Clear Chat & Start New Session"
-          >
-            Clear Chat
-          </motion.button>
-          <motion.button
-            onClick={handleEndChat}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="end-chat-btn"
-            title="End Chat & View Analysis"
-          >
-            End Chat
-          </motion.button>
-        </div>
-      </div>
-
       <div className="chatbot-messages" ref={chatMessagesRef}>
         {messages.map((message, index) => (
           <motion.div
@@ -261,6 +225,15 @@ const Chatbot = () => {
             className="send-button"
           >
             ➤
+          </motion.button>
+          <motion.button
+            onClick={handleEndChat}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="end-chat-button"
+            title="End Chat & View Analysis"
+          >
+            End Chat
           </motion.button>
         </div>
       </div>
