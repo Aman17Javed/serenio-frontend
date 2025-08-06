@@ -110,7 +110,7 @@ const AnimatedLogin = () => {
           animate={{ y: 0, opacity: 1 }}
         >
           <img src={require("../assets/signupLogo.png")} alt="logo" className="logo-img" />
-          <h2 className="login-title">Welcome Back</h2>
+          <h2 className="login-title">Welcome</h2>
           <p className="login-subtitle">Sign in to your account to continue</p>
         </motion.div>
 

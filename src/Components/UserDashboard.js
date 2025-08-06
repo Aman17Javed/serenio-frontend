@@ -372,7 +372,7 @@ const DashboardHome = () => {
       >
         <div className="header-content">
           <div className="welcome-section">
-            <h1>Welcome back! 👋</h1>
+            <h1>Welcome! 👋</h1>
             <p>Here's your mental wellness overview for today</p>
           </div>
           <div className="wellness-score">

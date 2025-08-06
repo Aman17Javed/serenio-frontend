@@ -83,7 +83,7 @@ const Chatbot = () => {
         {
           sender: "bot",
           name: "Serenio AI",
-          text: "Hello Aman! I'm Serenio AI, your personal assistant. How can I help you today?",
+          text: "Hello! I'm Serenio AI, your personal assistant. How can I help you today?",
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           sentiment: null,
         },
