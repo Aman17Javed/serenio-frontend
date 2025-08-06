@@ -21,6 +21,7 @@ html, body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
   overflow: hidden;
+  padding-top: 100px; /* Standard padding to prevent navbar overlap */
 }
 
 /* Loading Screen */
@@ -32,6 +33,7 @@ html, body {
   height: 100vh;
   color: white;
   text-align: center;
+  padding-top: 100px; /* Standard padding to prevent navbar overlap */
 }
 
 .loading-screen p {
@@ -50,6 +52,8 @@ html, body {
   justify-content: space-between;
   align-items: center;
   color: white;
+  position: relative; /* Ensure proper positioning */
+  z-index: 1; /* Ensure it's above background */
 }
 
 .chatbot-title h2 {

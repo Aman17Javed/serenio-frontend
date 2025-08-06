@@ -30,7 +30,10 @@ code {
 
 /* Ensure proper stacking context for fixed elements */
 .navbar {
+  position: sticky;
+  top: 0;
   z-index: 1000;
+  background-color: #ffffff;
 }
 
 /* Prevent horizontal overflow */
@@ -55,4 +58,18 @@ code {
 
 .modern-dashboard p {
   color: inherit;
+}
+
+/* Global page container styles to prevent navbar overlap */
+.page-container {
+  padding-top: 80px; /* Standard navbar height */
+  min-height: calc(100vh - 80px);
+}
+
+/* Specific page adjustments */
+.chatbot-container,
+.reports-container,
+.psych-dashboard,
+.admin-dashboard-container {
+  padding-top: 80px; /* Ensure consistent spacing */
 }
