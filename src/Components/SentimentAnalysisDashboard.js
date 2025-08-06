@@ -298,30 +298,33 @@ const SentimentAnalysisDashboard = () => {
             <p className="text-indigo-100 text-lg">Comprehensive insights from your conversations</p>
             <p className="text-sm text-indigo-200 mt-2">Session ID: {selectedSession}</p>
           </div>
-          <div className="flex gap-3 mt-6 md:mt-0">
+          <div className="button-container">
             <motion.button
               onClick={() => navigate("/chatbot")}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all border border-white/30"
+              className="action-button primary-button"
             >
-              💬 Start New Chat
+              <span className="button-icon">💬</span>
+              <span className="button-text">Start New Chat</span>
             </motion.button>
             <motion.button
               onClick={() => setShowHistorical(!showHistorical)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all border border-white/30"
+              className="action-button secondary-button"
             >
-              📊 {showHistorical ? 'Hide History' : 'View History'}
+              <span className="button-icon">📊</span>
+              <span className="button-text">{showHistorical ? 'Hide History' : 'View History'}</span>
             </motion.button>
             <motion.button
               onClick={handleGenerateReport}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg"
+              className="action-button success-button"
             >
-              📄 Generate Report
+              <span className="button-icon">📄</span>
+              <span className="button-text">Generate Report</span>
             </motion.button>
           </div>
         </div>
