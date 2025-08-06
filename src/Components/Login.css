@@ -195,25 +195,37 @@
 
 .signup-section {
   text-align: center;
+  margin-top: 24px;
 }
 
 .signup-text {
-  color: rgba(255, 255, 255, 0.9); /* Better contrast */
-  font-size: 14px;
+  color: white;
+  font-size: 15px;
   margin: 0;
-  font-weight: 500; /* Better readability */
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: nowrap;
 }
 
 .signup-link {
-  color: white;
+  color: #3B82F6;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
 .signup-link:hover {
-  text-decoration: underline;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  background: white;
+  color: #1D4ED8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Responsive Design */

@@ -186,10 +186,10 @@ const AnimatedLogin = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          <p className="signup-text">
-            Don't have an account?{" "}
+          <div className="signup-text">
+            <span>Don't have an account?</span>
             <Link to="/signup" className="signup-link">Create Account</Link>
-          </p>
+          </div>
         </motion.div>
       </motion.div>
     </motion.div>
