@@ -3,6 +3,7 @@
 .payment-card {
   max-width: 400px;
   margin: 40px auto;
+  margin-top: 160px; /* Add top margin to prevent navbar overlap */
   background: #cccfdb;
   border-radius: 16px;
   padding: 24px;

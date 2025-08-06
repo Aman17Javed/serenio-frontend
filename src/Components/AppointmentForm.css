@@ -2,6 +2,7 @@
   max-width: 600px;
   margin: 20px auto;
   padding: 20px;
+  padding-top: 120px; /* Add top padding to prevent navbar overlap */
 }
 
 .appointment-container h2 {

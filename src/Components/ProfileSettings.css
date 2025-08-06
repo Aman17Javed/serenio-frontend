@@ -3,6 +3,7 @@
 .profile-container {
   max-width: 600px;
   margin: 40px auto;
+  margin-top: 160px; /* Add top margin to prevent navbar overlap */
   padding: 0 1rem;
   font-family: "DM Sans", sans-serif;
   color: #0F1C4D;

@@ -8,6 +8,7 @@
   color: #1e293b;
   position: relative;
   overflow-x: hidden;
+  padding-top: 120px; /* Add top padding to prevent navbar overlap */
 }
 
 /* Glassmorphism Base Styles */

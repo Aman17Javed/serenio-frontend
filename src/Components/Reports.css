@@ -4,6 +4,7 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   padding: 20px;
+  padding-top: 120px; /* Add top padding to prevent navbar overlap */
 }
 
 /* Loading State */
@@ -13,6 +14,7 @@
   justify-content: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding-top: 120px; /* Add top padding to prevent navbar overlap */
 }
 
 .loading-content {

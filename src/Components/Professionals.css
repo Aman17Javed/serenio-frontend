@@ -1,5 +1,6 @@
 .professionals-container {
   padding: 20px 0;
+  padding-top: 120px; /* Add top padding to prevent navbar overlap */
   min-height: 100vh;
   background-color: #f5f7fa;
   width: 100%;

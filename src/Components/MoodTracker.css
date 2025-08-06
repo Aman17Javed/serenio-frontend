@@ -3,6 +3,7 @@
 .mood-tracker-page {
   max-width: 500px;
   margin: 2rem auto;
+  margin-top: 160px; /* Add top margin to prevent navbar overlap */
   padding: 2rem;
   background-color: #ffffff;
   border-radius: 16px;
