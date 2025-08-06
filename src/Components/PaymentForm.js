@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./PaymentForm.css";
 import api from "../api/axios";
-import Loader from "./Loader"; // ✅ Spinner component
+import Loader from "./Loader";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,89 +15,25 @@ const PaymentForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { psychologist, sessionPrice, appointment } = location.state || {};
-  const [selectedMethod, setSelectedMethod] = useState("");
-  const [transactionId, setTransactionId] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ For form submission
-  const [initialLoading, setInitialLoading] = useState(true); // ✅ For page load
-  const [demoMode, setDemoMode] = useState(true); // ✅ Demo mode for projects
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [demoMode, setDemoMode] = useState(true);
 
-  // ✅ Show loader on initial mount
+  // Show loader on initial mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setInitialLoading(false);
-    }, 1000); // Adjust timing as needed (1s delay)
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
-
-  // Validate Pakistani phone number format (e.g., 03XX-XXXXXXX)
-  const isValidPhoneNumber = (phone) => {
-    const phoneRegex = /^03\d{2}\d{7}$/;
-    return phoneRegex.test(phone);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!selectedMethod || !transactionId || !phoneNumber) {
-      toast.error("Please fill in all fields.", {
-        position: "top-center",
-      });
-      return;
-    }
-
-    if (!isValidPhoneNumber(phoneNumber)) {
-      toast.error("Please enter a valid phone number (e.g., 03XX-XXXXXXX).", {
-        position: "top-center",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      if (demoMode) {
-        // Demo mode - simulate payment success
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-        toast.success("Payment successful!", {
-          position: "top-center",
-        });
-        setTimeout(() => navigate("/my-appointments"), 2000);
-      } else {
-        // Real payment mode
-        await api.post("/payment", {
-          method: selectedMethod,
-          transactionId,
-          phoneNumber,
-        });
-
-        toast.success("Payment submitted successfully!", {
-          position: "top-center",
-        });
-        setTimeout(() => navigate("/my-appointments"), 2000);
-      }
-      
-      // Reset form fields after success
-      setSelectedMethod("");
-      setTransactionId("");
-      setPhoneNumber("");
-    } catch (err) {
-      console.error("Payment error:", err);
-      toast.error("Failed to submit payment. Please try again.", {
-        position: "top-center",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Show loader initially
   if (initialLoading) {
     return (
       <div className="payment-card initial-loader">
         <Loader />
-        <p>Loading payment form...</p>
+        <p>Preparing your secure payment...</p>
       </div>
     );
   }
@@ -107,11 +43,11 @@ const PaymentForm = () => {
       <div className="payment-card">
         <div className="payment-header">
           <div className="icon-circle">💳</div>
-          <h2>Payment</h2>
-          <p>Confirm your session booking and pay securely</p>
+          <h2>Secure Payment</h2>
+          <p>Complete your session booking with our secure payment gateway</p>
         </div>
 
-        {/* Demo Mode Toggle - Simplified */}
+        {/* Demo Mode Toggle */}
         <div className="demo-toggle">
           <label>
             <input
@@ -119,119 +55,80 @@ const PaymentForm = () => {
               checked={demoMode}
               onChange={(e) => setDemoMode(e.target.checked)}
             />
-            <span>Demo Mode</span>
+            <span>Demo Mode (No real charges)</span>
           </label>
         </div>
 
-        {/* Show psychologist and session info */}
+        {/* Session Information */}
         {psychologist && (
-          <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#e8f4fd', borderRadius: '5px', border: '1px solid #b3d9ff' }}>
-            <h4>Psychologist:</h4>
-            <p><strong>Name:</strong> {psychologist.name}</p>
-            <p><strong>Specialization:</strong> {psychologist.specialization}</p>
-            <p><strong>Session Price:</strong> PKR {sessionPrice}</p>
+          <div className="session-info">
+            <h4>📋 Session Details</h4>
+            <div className="info-grid">
+              <div className="info-item">
+                <span className="label">Psychologist:</span>
+                <span className="value">{psychologist.name}</span>
+              </div>
+              <div className="info-item">
+                <span className="label">Specialization:</span>
+                <span className="value">{psychologist.specialization}</span>
+              </div>
+              <div className="info-item">
+                <span className="label">Session Fee:</span>
+                <span className="value price">PKR {sessionPrice}</span>
+              </div>
+            </div>
           </div>
         )}
+
+        {/* Appointment Details */}
         {appointment && (
-          <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f7f7f7', borderRadius: '5px', border: '1px solid #eee' }}>
-            <h4>Appointment Details:</h4>
-            <p><strong>Date:</strong> {appointment.date}</p>
-            <p><strong>Time:</strong> {appointment.timeSlot}</p>
-            <p><strong>Reason:</strong> {appointment.reason}</p>
+          <div className="appointment-info">
+            <h4>📅 Appointment Details</h4>
+            <div className="info-grid">
+              <div className="info-item">
+                <span className="label">Date:</span>
+                <span className="value">{new Date(appointment.date).toLocaleDateString()}</span>
+              </div>
+              <div className="info-item">
+                <span className="label">Time:</span>
+                <span className="value">{appointment.timeSlot}</span>
+              </div>
+              {appointment.reason && (
+                <div className="info-item">
+                  <span className="label">Reason:</span>
+                  <span className="value">{appointment.reason}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Stripe Payment */}
-        <div style={{ marginBottom: '30px' }}>
+        <div className="stripe-section">
+          <h4>💳 Payment Method</h4>
+          <p className="payment-instruction">
+            {demoMode 
+              ? "Click 'Pay Now' to simulate a successful payment (no real charges)"
+              : "Enter your card details below to complete the payment"
+            }
+          </p>
           <Elements stripe={stripePromise}>
             <PaymentComponent
               amount={sessionPrice}
               currency="pkr"
               demoMode={demoMode}
               onSuccess={() => {
-                toast.success("Payment successful! Redirecting to your appointments...");
+                toast.success("🎉 Payment successful! Redirecting to your appointments...");
                 setTimeout(() => navigate("/my-appointments"), 2000);
               }}
             />
           </Elements>
         </div>
 
-        {/* Optionally, keep manual payment methods below Stripe */}
-        <hr style={{ margin: '30px 0' }} />
-        <h4>Or pay manually:</h4>
-        <form onSubmit={handleSubmit}>
-          <div className="payment-methods">
-            <label className={`method ${selectedMethod === "JazzCash" ? "selected" : ""}`}>
-              <input
-                type="radio"
-                name="method"
-                value="JazzCash"
-                onChange={() => setSelectedMethod("JazzCash")}
-              />
-              <span className="icon orange">🟧</span>
-              <div>
-                <strong>JazzCash</strong>
-                <p>Mobile wallet payment</p>
-              </div>
-            </label>
-            <label className={`method ${selectedMethod === "Easypaisa" ? "selected" : ""}`}>
-              <input
-                type="radio"
-                name="method"
-                value="Easypaisa"
-                onChange={() => setSelectedMethod("Easypaisa")}
-              />
-              <span className="icon green">🟩</span>
-              <div>
-                <strong>Easypaisa</strong>
-                <p>Digital wallet payment</p>
-              </div>
-            </label>
-            <label className={`method ${selectedMethod === "Bank" ? "selected" : ""}`}>
-              <input
-                type="radio"
-                name="method"
-                value="Bank"
-                onChange={() => setSelectedMethod("Bank")}
-              />
-              <span className="icon blue">🟦</span>
-              <div>
-                <strong>Bank Transfer</strong>
-                <p>Direct bank transfer</p>
-              </div>
-            </label>
-          </div>
-          <div className="form-group">
-            <label>Transaction ID</label>
-            <input
-              type="text"
-              placeholder="Enter transaction ID"
-              value={transactionId}
-              onChange={(e) => setTransactionId(e.target.value)}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label>Phone Number</label>
-            <input
-              type="text"
-              placeholder="03XX-XXXXXXX"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader /> Processing...
-              </>
-            ) : (
-              demoMode ? "Demo Payment" : "Confirm Manual Payment"
-            )}
-          </button>
-        </form>
-        <p className="secured-text">🔒 Secured by Serenio</p>
+        <div className="security-info">
+          <p>🔒 Your payment is secured with bank-level encryption</p>
+          <p>💚 Your mental health journey starts here</p>
+        </div>
       </div>
       <ToastContainer />
     </>

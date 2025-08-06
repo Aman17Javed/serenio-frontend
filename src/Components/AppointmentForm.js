@@ -14,8 +14,8 @@ const AppointmentForm = () => {
   const [psychologist, setPsychologist] = useState(null);
   const [error, setError] = useState("");
   const [loadingPsychologists, setLoadingPsychologists] = useState(true);
-  // Remove psychologists array and dropdown
-  // const [psychologists, setPsychologists] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,14 +31,6 @@ const AppointmentForm = () => {
     }
   }, [navigate]);
 
-  // Hardcoded sample psychologist for demonstration
-  // const samplePsychologist = {
-  //   _id: "66885b1e32e09e974e09faf32",
-  //   name: "Dr. Alice Smith",
-  //   specialization: "Therapist",
-  //   hourlyRate: 5000,
-  // };
-
   useEffect(() => {
     // If psychologist data is passed from professionals tab, use it
     if (location.state?.psychologist) {
@@ -52,8 +44,6 @@ const AppointmentForm = () => {
       setTimeout(() => navigate("/Professionals"), 2000);
     }
   }, [location.state, navigate]);
-
-  // Remove fetchPsychologists function entirely
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -75,7 +65,18 @@ const AppointmentForm = () => {
     fetchAppointments();
   }, []);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Clear error when user starts typing
+    if (error) setError("");
+    
+    // If date is selected, fetch available slots
+    if (name === "date" && value && psychologist?._id) {
+      getAvailableSlots(value);
+    }
+  };
 
   // Check if selected time slot conflicts with existing appointments
   const checkTimeSlotConflict = (selectedDate, selectedTime) => {
@@ -86,31 +87,51 @@ const AppointmentForm = () => {
     return conflictingAppointment;
   };
 
+  const getAvailableSlots = async (date) => {
+    if (!psychologist?._id) return;
+    
+    setLoadingSlots(true);
+    try {
+      const response = await axios.get(`/api/appointments/available-slots?psychologistId=${psychologist._id}&date=${date}`);
+      setAvailableSlots(response.data.availableSlots || []);
+    } catch (error) {
+      console.error("Error fetching available slots:", error);
+      toast.error("Failed to load available time slots");
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setError("");
 
-    // Comprehensive validation
+    // Enhanced validation with better messages
     if (!form.psychologistId) {
       setError("Please select a psychologist.");
       return;
     }
     
     if (!form.date) {
-      setError("Please select a date.");
+      setError("Please select a date for your appointment.");
       return;
     }
     
     if (!form.time) {
-      setError("Please select a time slot.");
+      setError("Please select a time slot for your appointment.");
+      return;
+    }
+
+    if (!form.reason.trim()) {
+      setError("Please provide a reason for your appointment to help us prepare better.");
       return;
     }
 
     // Validate date format
     const selectedDate = new Date(form.date);
     if (isNaN(selectedDate.getTime())) {
-      setError("Invalid date format.");
+      setError("Invalid date format. Please select a valid date.");
       return;
     }
 
@@ -118,7 +139,15 @@ const AppointmentForm = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (selectedDate < today) {
-      setError("Cannot book appointments in the past.");
+      setError("Cannot book appointments in the past. Please select a future date.");
+      return;
+    }
+
+    // Check if date is too far in the future (e.g., more than 3 months)
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+    if (selectedDate > threeMonthsFromNow) {
+      setError("Cannot book appointments more than 3 months in advance.");
       return;
     }
 
@@ -141,7 +170,7 @@ const AppointmentForm = () => {
         psychologistId: form.psychologistId,
         date: formattedDate,
         timeSlot: form.time,
-        reason: form.reason,
+        reason: form.reason.trim(),
       };
 
       console.log("Submitting appointment with data:", appointmentData);
@@ -153,8 +182,25 @@ const AppointmentForm = () => {
       );
 
       console.log("Booking response:", bookingRes.data);
-      toast.success("Appointment booked successfully!");
-      setMessage(`Appointment booked successfully for ${new Date(formattedDate).toLocaleDateString()} at ${form.time} with ${psychologist?.name}! Redirecting to your appointments...`);
+      
+      // Show success message with appointment details
+      const appointmentDate = new Date(formattedDate).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      toast.success(`✅ Appointment booked successfully for ${appointmentDate} at ${form.time}!`);
+      
+      setMessage(`🎉 Great! Your appointment has been booked successfully.
+
+📅 Date: ${appointmentDate}
+⏰ Time: ${form.time}
+👨‍⚕️ Psychologist: ${psychologist?.name}
+💬 Reason: ${form.reason}
+
+Redirecting to payment in 3 seconds...`);
       
       // Refresh appointments list
       const res = await axios.get("/api/appointments/my", {
@@ -165,7 +211,7 @@ const AppointmentForm = () => {
       // Reset form
       setForm({ psychologistId: form.psychologistId, date: "", time: "", reason: "" });
       
-      // Navigate after a short delay to show success message
+      // Navigate to payment after a short delay
       setTimeout(() => {
         navigate("/PaymentForm", {
           state: {
@@ -175,7 +221,7 @@ const AppointmentForm = () => {
               psychologistId: form.psychologistId,
               date: formattedDate,
               timeSlot: form.time,
-              reason: form.reason,
+              reason: form.reason.trim(),
             },
           },
         });
@@ -189,23 +235,22 @@ const AppointmentForm = () => {
         config: err.config
       });
       
-      // Handle specific error cases
+      // Handle specific error cases with better messages
       if (err.response?.status === 400) {
-        const errorMessage = err.response?.data?.message || "Invalid request data";
+        const errorMessage = err.response?.data?.message || "Invalid request data. Please check your information.";
         setError(errorMessage);
       } else if (err.response?.status === 401) {
-        setError("Authentication failed. Please log in again.");
+        setError("Your session has expired. Please log in again.");
         localStorage.removeItem("token");
         navigate("/login");
       } else if (err.response?.status === 409) {
-        const conflictMessage = err.response?.data?.message || "This time slot is already booked.";
-        setError(`${conflictMessage} Please select a different date or time.`);
-        // Clear the time selection to help user choose a different slot
-        setForm(prev => ({ ...prev, time: "" }));
-      } else if (err.response?.status === 404) {
-        setError("Psychologist not found. Please select another psychologist.");
+        setError("This time slot is no longer available. Please select a different time.");
+        // Refresh available slots
+        if (form.date) {
+          getAvailableSlots(form.date);
+        }
       } else {
-        setError(err.response?.data?.message || err.message || "Booking failed. Please try again.");
+        setError("Failed to book appointment. Please try again or contact support if the problem persists.");
       }
     } finally {
       setLoading(false);
@@ -213,178 +258,183 @@ const AppointmentForm = () => {
   };
 
   const handleCancel = async (id) => {
-    if (!window.confirm("Cancel this appointment?")) return;
+    if (!window.confirm("Are you sure you want to cancel this appointment?")) {
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
-      if (!token) throw new Error("Authentication required.");
       await axios.put(`/api/appointments/cancel/${id}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAppointments((prev) => prev.filter((appt) => appt._id !== id));
-      setMessage("Appointment cancelled.");
+      
+      toast.success("Appointment cancelled successfully!");
+      
+      // Refresh appointments list
+      const res = await axios.get("/api/appointments/my", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAppointments(res.data.appointments || []);
     } catch (err) {
-      setError("Failed to cancel.");
+      console.error("Cancellation error:", err);
+      toast.error("Failed to cancel appointment. Please try again.");
     }
   };
 
-  // Generate time slots with better formatting and availability checking
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 9; hour <= 17; hour++) {
       const time = `${hour.toString().padStart(2, '0')}:00`;
-      const displayTime = hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`;
-      slots.push({ value: time, display: displayTime });
+      slots.push(time);
     }
     return slots;
   };
 
-  const timeSlots = generateTimeSlots();
-
-  // Get available slots for selected date
-  const getAvailableSlots = async (date) => {
-    if (!date || !form.psychologistId) return timeSlots;
-    
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`/api/appointments/available-slots?psychologistId=${form.psychologistId}&date=${date}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      const availableSlots = response.data.availableSlots || [];
-      return timeSlots.map(slot => ({
-        ...slot,
-        available: availableSlots.includes(slot.value)
-      }));
-    } catch (error) {
-      console.error('Error fetching available slots:', error);
-      return timeSlots;
-    }
-  };
-
-  const [availableSlots, setAvailableSlots] = useState(timeSlots);
-
-  // Update available slots when date changes
-  useEffect(() => {
-    if (form.date && form.psychologistId) {
-      getAvailableSlots(form.date).then(setAvailableSlots);
-    }
-  }, [form.date, form.psychologistId]);
+  if (error && !psychologist) {
+    return (
+      <div className="appointment-container">
+        <div className="error-message">
+          <h3>⚠️ {error}</h3>
+          <p>Redirecting to professionals page...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
       className="appointment-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <motion.h2 initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-        Book Appointment
-      </motion.h2>
-      {message && <p className="message success">{message}</p>}
-      {error && <p className="message error">{error}</p>}
+      <div className="appointment-header">
+        <h2>📅 Book Your Session</h2>
+        <p>Schedule your mental health session with {psychologist?.name}</p>
+      </div>
 
-      <motion.form
-        onSubmit={handleSubmit}
-        className="appointment-form"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Remove Psychologist Selection Dropdown */}
-        {/* Only show Psychologist Info Display */}
-        {psychologist && (
-          <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#e8f4fd', borderRadius: '5px', border: '1px solid #b3d9ff' }}>
-            <h4>Selected Psychologist:</h4>
-            <p><strong>Name:</strong> {psychologist.name}</p>
-            <p><strong>Specialization:</strong> {psychologist.specialization}</p>
-            <p><strong>Session Price:</strong> {psychologist.sessionPrice ? `PKR ${psychologist.sessionPrice}` : psychologist.hourlyRate ? `PKR ${psychologist.hourlyRate}` : 'N/A'}</p>
+      {psychologist && (
+        <div className="psychologist-info">
+          <h3>👨‍⚕️ {psychologist.name}</h3>
+          <p><strong>Specialization:</strong> {psychologist.specialization}</p>
+          <p><strong>Session Fee:</strong> PKR {psychologist.sessionPrice || psychologist.hourlyRate}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="appointment-form">
+        <div className="form-group">
+          <label htmlFor="date">📅 Select Date</label>
+          <input
+            type="date"
+            id="date"
+            name="date"
+            value={form.date}
+            onChange={handleChange}
+            min={new Date().toISOString().split('T')[0]}
+            max={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+            required
+          />
+          <small>Select a date within the next 3 months</small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="time">⏰ Select Time</label>
+          {loadingSlots ? (
+            <div className="loading-slots">
+              <p>Loading available time slots...</p>
+            </div>
+          ) : (
+            <div className="time-slots-grid">
+              {availableSlots.length > 0 ? (
+                availableSlots.map((slot) => (
+                  <button
+                    key={slot}
+                    type="button"
+                    className={`time-slot-button ${form.time === slot ? 'selected' : ''}`}
+                    onClick={() => setForm({ ...form, time: slot })}
+                  >
+                    <span className="time-display">{slot}</span>
+                  </button>
+                ))
+              ) : (
+                form.date ? (
+                  <p className="no-slots">No available slots for this date. Please select another date.</p>
+                ) : (
+                  <p className="select-date">Please select a date first to see available time slots.</p>
+                )
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="reason">💭 Session Reason</label>
+          <textarea
+            id="reason"
+            name="reason"
+            value={form.reason}
+            onChange={handleChange}
+            placeholder="Please describe the reason for your session (e.g., stress, anxiety, relationship issues, etc.)"
+            rows="4"
+            required
+          />
+          <small>This helps us prepare better for your session</small>
+        </div>
+
+        {error && (
+          <div className="error-message">
+            <p>❌ {error}</p>
           </div>
         )}
 
-        {/* Date Selection */}
-        <input
-          type="date"
-          name="date"
-          value={form.date}
-          onChange={handleChange}
-          className="appointment-form-input"
-          min={new Date().toISOString().split('T')[0]}
-        />
+        {message && (
+          <div className="success-message">
+            <p>{message}</p>
+          </div>
+        )}
 
-        {/* Time Selection with Calendar View */}
-        <div className="time-slot-container">
-          <label className="form-label">Select Time Slot:</label>
-          <div className="time-slots-grid">
-            {availableSlots.map((slot) => (
-              <button
-                key={slot.value}
-                type="button"
-                className={`time-slot-button ${form.time === slot.value ? 'selected' : ''} ${!slot.available ? 'disabled' : ''}`}
-                onClick={() => setForm({ ...form, time: slot.value })}
-                disabled={!slot.available}
-              >
-                <span className="time-display">{slot.display}</span>
-                {!slot.available && <span className="booked-indicator">Booked</span>}
-              </button>
-            ))}
+        <button type="submit" className="submit-btn" disabled={loading}>
+          {loading ? (
+            <>
+              <div className="spinner"></div>
+              Booking Appointment...
+            </>
+          ) : (
+            "📅 Book Appointment"
+          )}
+        </button>
+      </form>
+
+      {/* Existing Appointments */}
+      {appointments.length > 0 && (
+        <div className="existing-appointments">
+          <h3>📋 Your Upcoming Appointments</h3>
+          <div className="appointments-list">
+            {appointments
+              .filter(appt => appt.status === 'Booked')
+              .sort((a, b) => new Date(a.date) - new Date(b.date))
+              .map((appointment) => (
+                <div key={appointment._id} className="appointment-card">
+                  <div className="appointment-header">
+                    <h4>Appointment with {appointment.psychologistName || 'Psychologist'}</h4>
+                    <span className="status booked">Booked</span>
+                  </div>
+                  <div className="appointment-details">
+                    <p><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> {appointment.timeSlot}</p>
+                    {appointment.reason && <p><strong>Reason:</strong> {appointment.reason}</p>}
+                  </div>
+                  <button
+                    onClick={() => handleCancel(appointment._id)}
+                    className="cancel-button"
+                  >
+                    Cancel Appointment
+                  </button>
+                </div>
+              ))}
           </div>
         </div>
-        
-        {form.date && availableSlots.every(slot => !slot.available) && (
-          <p className="message error">All time slots are booked for this date. Please select a different date.</p>
-        )}
-
-        {/* Reason for Appointment */}
-        <textarea
-          name="reason"
-          value={form.reason}
-          onChange={handleChange}
-          placeholder="Reason for appointment (optional)"
-          className="appointment-form-input"
-        />
-
-        <motion.button
-          type="submit"
-          disabled={loading || !form.psychologistId || !form.date || !form.time}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            opacity: (!form.psychologistId || !form.date || !form.time) ? 0.6 : 1,
-            cursor: (!form.psychologistId || !form.date || !form.time) ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {loading ? "Processing..." : "Confirm Appointment"}
-        </motion.button>
-      </motion.form>
-
-      <div className="appointment-list">
-        <h2>Your Appointments</h2>
-        {appointments.length === 0 ? (
-          <p>No upcoming appointments.</p>
-        ) : (
-          <ul>
-            {appointments.map((appt) => (
-              <motion.li
-                key={appt._id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <p>
-                  <strong>{new Date(appt.date).toLocaleDateString()}</strong> at{" "}
-                  <strong>{appt.timeSlot}</strong> with{" "}
-                  {appt.psychologistId?.name || "Unknown"} (
-                  {appt.psychologistId?.specialization || ""})
-                </p>
-                <p>Payment Status: {appt.paymentId?.paymentStatus || "N/A"}</p>
-                {appt.status === "Booked" && (
-                  <button onClick={() => handleCancel(appt._id)}>Cancel</button>
-                )}
-              </motion.li>
-            ))}
-          </ul>
-        )}
-      </div>
+      )}
     </motion.div>
   );
 };
