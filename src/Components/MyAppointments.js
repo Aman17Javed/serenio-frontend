@@ -186,72 +186,73 @@ const MyAppointments = () => {
     }
   };
 
+  // Calculate statistics
+  const stats = {
+    total: appointments.length,
+    booked: appointments.filter(apt => apt.status === 'Booked' || !apt.status).length,
+    completed: appointments.filter(apt => apt.status === 'Completed').length,
+    cancelled: appointments.filter(apt => apt.status === 'Cancelled').length
+  };
+
   if (loading) {
-    return <div className="loading">Loading appointments...</div>;
+    return (
+      <div className="my-appointments">
+        <div className="loading">
+          <h3>📋 Loading Your Appointments</h3>
+          <p>Please wait while we fetch your appointment details...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <div className="my-appointments">
+        <div className="error">
+          <h3>⚠️ Error Loading Appointments</h3>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="my-appointments">
-      <h2>My Appointments</h2>
-      
-      {error && (
-        <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#ffe6e6', borderRadius: '5px', border: '1px solid #ff9999' }}>
-          <p style={{ color: '#cc0000', margin: '0 0 10px 0' }}><strong>Error:</strong> {error}</p>
-          
-          {error.includes('Backend temporarily unavailable') && (
-            <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#fff3cd', borderRadius: '4px', border: '1px solid #ffeaa7' }}>
-              <h4 style={{ margin: '0 0 8px 0', color: '#856404' }}>🔧 Backend Troubleshooting:</h4>
-              <ul style={{ margin: '0', paddingLeft: '20px', color: '#856404' }}>
-                <li>Check if your backend server is running on port 5000</li>
-                <li>Verify the `/api/appointments/my` endpoint exists</li>
-                <li>Check backend logs for database connection issues</li>
-                <li>Ensure authentication middleware is working properly</li>
-                <li>Test the endpoint directly: <code>curl -X GET https://serenio-production.up.railway.app/api/appointments/my</code></li>
-              </ul>
-            </div>
-          )}
-          
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button 
-              onClick={fetchAppointments}
-              style={{ 
-                backgroundColor: '#cc0000', 
-                color: 'white', 
-                border: 'none', 
-                padding: '8px 16px', 
-                borderRadius: '4px', 
-                cursor: 'pointer' 
-              }}
-            >
-              Retry
-            </button>
-            <button 
-              onClick={testBackendConnection}
-              style={{ 
-                backgroundColor: '#0066cc', 
-                color: 'white', 
-                border: 'none', 
-                padding: '8px 16px', 
-                borderRadius: '4px', 
-                cursor: 'pointer' 
-              }}
-            >
-              Test Backend
-            </button>
+      <div className="appointments-container">
+                <div className="appointments-header">
+          <h1>📋 My Appointments</h1>
+          <p>Manage and track your mental health sessions</p>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="appointments-stats">
+          <div className="stat-card">
+            <div className="stat-number">{stats.total}</div>
+            <div className="stat-label">Total Appointments</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{stats.booked}</div>
+            <div className="stat-label">Upcoming</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{stats.completed}</div>
+            <div className="stat-label">Completed</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{stats.cancelled}</div>
+            <div className="stat-label">Cancelled</div>
           </div>
         </div>
-      )}
-      
-      {appointments.length === 0 && !loading && !error ? (
-        <div className="no-appointments">
-          <p>You don't have any appointments yet.</p>
-          <p>Book your first appointment from the professionals tab!</p>
-        </div>
-      ) : (
+        
+        {appointments.length === 0 && !loading && !error ? (
+          <div className="no-appointments">
+            <h3>📅 No Appointments Yet</h3>
+            <p>You haven't booked any appointments yet. Start your mental health journey today!</p>
+            <a href="/Professionals" className="book-appointment-btn">
+              📋 Book Your First Appointment
+            </a>
+          </div>
+        ) : (
         <div className="appointments-list">
           {appointments.map(appointment => (
             <div key={appointment._id} className={`appointment-card ${appointment.status === 'Cancelled' ? 'cancelled' : ''}`}>
@@ -305,7 +306,8 @@ const MyAppointments = () => {
             </div>
           ))}
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
