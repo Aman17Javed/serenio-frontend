@@ -46,6 +46,7 @@ const Chatbot = () => {
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [showSentiment, setShowSentiment] = useState(false);
+  const [endingChat, setEndingChat] = useState(false);
   const chatMessagesRef = useRef(null);
 
   useEffect(() => {
@@ -78,18 +79,29 @@ const Chatbot = () => {
     const currentInput = input;
     setInput("");
     
-    // Analyze sentiment using OpenAI API
-    const userSentiment = await analyzeSentiment(currentInput);
+    // Add user message immediately with loading state
     const userMessage = {
       sender: "user",
       name: "Aman",
       text: currentInput,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      sentiment: userSentiment,
+      sentiment: null, // Will be updated after analysis
     };
     
     setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
+
+    // Analyze sentiment using OpenAI API
+    const userSentiment = await analyzeSentiment(currentInput);
+    
+    // Update the user message with sentiment
+    setMessages((prev) => 
+      prev.map((msg, index) => 
+        index === prev.length - 1 && msg.sender === "user" 
+          ? { ...msg, sentiment: userSentiment }
+          : msg
+      )
+    );
 
     try {
       // Send message to chatbot API (which will save to database)
@@ -117,8 +129,13 @@ const Chatbot = () => {
     }
   };
 
-  const handleEndChat = () => {
+  const handleEndChat = async () => {
     console.log("🔚 Ending chat session:", sessionId);
+    setEndingChat(true);
+    
+    // Show analysis loading for a moment
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
     // Clear the session ID from localStorage to ensure a fresh session next time
     localStorage.removeItem("serenioSessionId");
     navigate(`/sentimentAnalysisDashboard/${sessionId}`);
@@ -159,6 +176,18 @@ const Chatbot = () => {
         <div className="loading-screen">
           <Loader size={60} />
           <p>Initializing Serenio AI...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (endingChat) {
+    return (
+      <div className="chatbot-container">
+        <div className="loading-screen">
+          <Loader size={60} />
+          <p>Analyzing your conversation...</p>
+          <p className="analysis-subtitle">Preparing your sentiment analysis report</p>
         </div>
       </div>
     );
