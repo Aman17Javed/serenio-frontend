@@ -93,10 +93,10 @@ const SentimentAnalysisDashboard = () => {
         )
       );
 
-      // Generate sentiment trends
-      generateSentimentTrends(uniqueLogs);
-      generateEmotionBreakdown(uniqueLogs);
-      generateTopics(uniqueLogs);
+      // Generate sentiment trends and emotion breakdown using OpenAI API
+      await generateSentimentTrends(uniqueLogs);
+      await generateEmotionBreakdown(uniqueLogs);
+      await generateTopics(uniqueLogs);
       calculateSessionStats(uniqueLogs);
 
     } catch (err) {
@@ -140,51 +140,146 @@ const SentimentAnalysisDashboard = () => {
     }
   };
 
-  const generateSentimentTrends = (logs) => {
-    const trends = logs.map((log, index) => ({
-      id: index,
-      sentiment: analyzeSimpleSentiment(log.message),
-      timestamp: new Date(log.createdAt).toLocaleTimeString(),
-      message: log.message.substring(0, 50) + "..."
-    }));
-    setSentimentTrends(trends);
+  const generateSentimentTrends = async (logs) => {
+    try {
+      // Use OpenAI API for sentiment analysis
+      const messages = logs.map(log => ({
+        role: "user",
+        content: log.message
+      }));
+      
+      const response = await api.post("/api/openai/sentiment", { messages });
+      const analysis = response.data;
+      
+      const trends = logs.map((log, index) => ({
+        id: index,
+        sentiment: analysis.sentiment || "NEUTRAL",
+        timestamp: new Date(log.createdAt).toLocaleTimeString(),
+        message: log.message.substring(0, 50) + "..."
+      }));
+      setSentimentTrends(trends);
+    } catch (error) {
+      console.error("Error generating sentiment trends:", error);
+      // Fallback to simple analysis
+      const trends = logs.map((log, index) => ({
+        id: index,
+        sentiment: "NEUTRAL",
+        timestamp: new Date(log.createdAt).toLocaleTimeString(),
+        message: log.message.substring(0, 50) + "..."
+      }));
+      setSentimentTrends(trends);
+    }
   };
 
-  const generateEmotionBreakdown = (logs) => {
-    const emotions = logs.reduce((acc, log) => {
-      const emotion = detectEmotion(log.message);
-      acc[emotion] = (acc[emotion] || 0) + 1;
-      return acc;
-    }, {});
-    setEmotionBreakdown(emotions);
+  const generateEmotionBreakdown = async (logs) => {
+    try {
+      // Use OpenAI API for emotion analysis
+      const messages = logs.map(log => ({
+        role: "user",
+        content: log.message
+      }));
+      
+      const response = await api.post("/api/openai/sentiment", { messages });
+      const analysis = response.data;
+      
+      // Convert OpenAI emotion scores to counts
+      const emotions = {};
+      if (analysis.emotions) {
+        Object.entries(analysis.emotions).forEach(([emotion, score]) => {
+          if (score > 0.1) { // Only count emotions with significant scores
+            emotions[emotion] = Math.round(score * logs.length);
+          }
+        });
+      }
+      
+      setEmotionBreakdown(emotions);
+    } catch (error) {
+      console.error("Error generating emotion breakdown:", error);
+      // Fallback to simple analysis
+      const emotions = logs.reduce((acc, log) => {
+        const emotion = "neutral";
+        acc[emotion] = (acc[emotion] || 0) + 1;
+        return acc;
+      }, {});
+      setEmotionBreakdown(emotions);
+    }
   };
 
-  const generateTopics = (logs) => {
-    const topicKeywords = {
-      'Anxiety': ['anxious', 'worry', 'stress', 'panic', 'fear'],
-      'Depression': ['sad', 'depressed', 'hopeless', 'worthless', 'tired'],
-      'Sleep': ['sleep', 'insomnia', 'tired', 'rest', 'bed'],
-      'Relationships': ['relationship', 'partner', 'family', 'friend', 'love'],
-      'Work': ['work', 'job', 'career', 'boss', 'colleague'],
-      'Health': ['health', 'sick', 'pain', 'doctor', 'medicine']
-    };
+  const generateTopics = async (logs) => {
+    try {
+      // Use OpenAI API for topic analysis
+      const messages = logs.map(log => ({
+        role: "user",
+        content: log.message
+      }));
+      
+      const response = await api.post("/api/openai/sentiment", { messages });
+      const analysis = response.data;
+      
+      if (analysis.topics && analysis.topics.length > 0) {
+        // Convert OpenAI topics to our format
+        const topics = analysis.topics.map(topic => ({
+          topic: topic.topic,
+          count: Math.round(topic.confidence * logs.length)
+        }));
+        setTopics(topics);
+      } else {
+        // Fallback to keyword-based topic detection
+        const topicKeywords = {
+          'Anxiety': ['anxious', 'worry', 'stress', 'panic', 'fear'],
+          'Depression': ['sad', 'depressed', 'hopeless', 'worthless', 'tired'],
+          'Sleep': ['sleep', 'insomnia', 'tired', 'rest', 'bed'],
+          'Relationships': ['relationship', 'partner', 'family', 'friend', 'love'],
+          'Work': ['work', 'job', 'career', 'boss', 'colleague'],
+          'Health': ['health', 'sick', 'pain', 'doctor', 'medicine']
+        };
 
-    const topicCounts = {};
-    logs.forEach(log => {
-      const message = log.message.toLowerCase();
-      Object.entries(topicKeywords).forEach(([topic, keywords]) => {
-        if (keywords.some(keyword => message.includes(keyword))) {
-          topicCounts[topic] = (topicCounts[topic] || 0) + 1;
-        }
+        const topicCounts = {};
+        logs.forEach(log => {
+          const message = log.message.toLowerCase();
+          Object.entries(topicKeywords).forEach(([topic, keywords]) => {
+            if (keywords.some(keyword => message.includes(keyword))) {
+              topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+            }
+          });
+        });
+
+        const sortedTopics = Object.entries(topicCounts)
+          .map(([topic, count]) => ({ topic, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+        
+        setTopics(sortedTopics);
+      }
+    } catch (error) {
+      console.error("Error generating topics:", error);
+      // Fallback to keyword-based topic detection
+      const topicKeywords = {
+        'Anxiety': ['anxious', 'worry', 'stress', 'panic', 'fear'],
+        'Depression': ['sad', 'depressed', 'hopeless', 'worthless', 'tired'],
+        'Sleep': ['sleep', 'insomnia', 'tired', 'rest', 'bed'],
+        'Relationships': ['relationship', 'partner', 'family', 'friend', 'love'],
+        'Work': ['work', 'job', 'career', 'boss', 'colleague'],
+        'Health': ['health', 'sick', 'pain', 'doctor', 'medicine']
+      };
+
+      const topicCounts = {};
+      logs.forEach(log => {
+        const message = log.message.toLowerCase();
+        Object.entries(topicKeywords).forEach(([topic, keywords]) => {
+          if (keywords.some(keyword => message.includes(keyword))) {
+            topicCounts[topic] = (topicCounts[topic] || 0) + 1;
+          }
+        });
       });
-    });
 
-    const sortedTopics = Object.entries(topicCounts)
-      .map(([topic, count]) => ({ topic, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-    
-    setTopics(sortedTopics);
+      const sortedTopics = Object.entries(topicCounts)
+        .map(([topic, count]) => ({ topic, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+      
+      setTopics(sortedTopics);
+    }
   };
 
   const calculateSessionStats = (logs) => {
@@ -210,37 +305,8 @@ const SentimentAnalysisDashboard = () => {
     });
   };
 
-  const analyzeSimpleSentiment = (text) => {
-    const positiveWords = ['happy', 'good', 'great', 'excellent', 'wonderful', 'amazing', 'love', 'joy'];
-    const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'anxious', 'depressed'];
-    
-    const words = text.toLowerCase().split(' ');
-    const positiveCount = words.filter(word => positiveWords.includes(word)).length;
-    const negativeCount = words.filter(word => negativeWords.includes(word)).length;
-    
-    if (positiveCount > negativeCount) return 'POSITIVE';
-    if (negativeCount > positiveCount) return 'NEGATIVE';
-    return 'NEUTRAL';
-  };
-
-  const detectEmotion = (text) => {
-    const emotions = {
-      joy: ['happy', 'joy', 'excited', 'great', 'wonderful'],
-      sadness: ['sad', 'depressed', 'hopeless', 'crying'],
-      anger: ['angry', 'mad', 'furious', 'hate'],
-      fear: ['scared', 'afraid', 'anxious', 'worried'],
-      surprise: ['shocked', 'surprised', 'amazed'],
-      neutral: ['okay', 'fine', 'normal']
-    };
-
-    const words = text.toLowerCase().split(' ');
-    for (const [emotion, keywords] of Object.entries(emotions)) {
-      if (keywords.some(keyword => words.includes(keyword))) {
-        return emotion;
-      }
-    }
-    return 'neutral';
-  };
+  // OpenAI API is now used for sentiment and emotion analysis
+  // Removed hardcoded functions in favor of AI-powered analysis
 
   const handleGenerateReport = async () => {
     try {

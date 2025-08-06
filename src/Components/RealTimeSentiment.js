@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './RealTimeSentiment.css';
+import api from '../api/axios';
 
 const RealTimeSentiment = ({ messages, isVisible = true }) => {
   const [currentSentiment, setCurrentSentiment] = useState('neutral');
@@ -14,71 +15,86 @@ const RealTimeSentiment = ({ messages, isVisible = true }) => {
     }
   }, [messages]);
 
-  const analyzeSentiment = () => {
+  const analyzeSentiment = async () => {
     setIsAnalyzing(true);
     
-    // Simple sentiment analysis based on keywords
-    const recentMessages = messages.slice(-5); // Analyze last 5 messages
-    const allText = recentMessages.map(msg => msg.text).join(' ').toLowerCase();
-    
-    const positiveWords = ['happy', 'good', 'great', 'excellent', 'wonderful', 'amazing', 'love', 'like', 'excited', 'joy', 'pleased'];
-    const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'frustrated', 'worried', 'anxious', 'depressed', 'lonely'];
-    const fearWords = ['scared', 'afraid', 'fear', 'worried', 'anxious', 'nervous', 'terrified'];
-    const angerWords = ['angry', 'furious', 'mad', 'irritated', 'frustrated', 'annoyed'];
-    const joyWords = ['happy', 'joy', 'excited', 'thrilled', 'delighted', 'pleased', 'content'];
-    const sadnessWords = ['sad', 'depressed', 'lonely', 'melancholy', 'grief', 'sorrow'];
-    
-    let positiveCount = 0;
-    let negativeCount = 0;
-    let fearCount = 0;
-    let angerCount = 0;
-    let joyCount = 0;
-    let sadnessCount = 0;
-    
-    positiveWords.forEach(word => {
-      if (allText.includes(word)) positiveCount++;
-    });
-    negativeWords.forEach(word => {
-      if (allText.includes(word)) negativeCount++;
-    });
-    fearWords.forEach(word => {
-      if (allText.includes(word)) fearCount++;
-    });
-    angerWords.forEach(word => {
-      if (allText.includes(word)) angerCount++;
-    });
-    joyWords.forEach(word => {
-      if (allText.includes(word)) joyCount++;
-    });
-    sadnessWords.forEach(word => {
-      if (allText.includes(word)) sadnessCount++;
-    });
-    
-    // Determine dominant sentiment
-    let sentiment = 'neutral';
-    if (positiveCount > negativeCount && positiveCount > 0) {
-      sentiment = 'positive';
-    } else if (negativeCount > positiveCount && negativeCount > 0) {
-      sentiment = 'negative';
+    try {
+      // Use OpenAI API for real-time sentiment analysis
+      const recentMessages = messages.slice(-5); // Analyze last 5 messages
+      const messagesForAnalysis = recentMessages.map(msg => ({
+        role: "user",
+        content: msg.text
+      }));
+      
+      const response = await api.post("/api/openai/sentiment", { messages: messagesForAnalysis });
+      const analysis = response.data;
+      
+      // Set current sentiment
+      setCurrentSentiment(analysis.sentiment?.toLowerCase() || 'neutral');
+      
+      // Update emotion breakdown from OpenAI analysis
+      if (analysis.emotions) {
+        setEmotionBreakdown(analysis.emotions);
+      } else {
+        // Fallback emotion breakdown
+        setEmotionBreakdown({
+          joy: 0.2,
+          sadness: 0.2,
+          anger: 0.1,
+          fear: 0.1,
+          neutral: 0.4
+        });
+      }
+      
+      // Update sentiment history
+      setSentimentHistory(prev => [...prev, {
+        sentiment: analysis.sentiment?.toLowerCase() || 'neutral',
+        timestamp: new Date(),
+        messageCount: messages.length
+      }]);
+      
+    } catch (error) {
+      console.error("Error analyzing sentiment:", error);
+      
+      // Fallback to simple analysis
+      const recentMessages = messages.slice(-5);
+      const allText = recentMessages.map(msg => msg.text).join(' ').toLowerCase();
+      
+      const positiveWords = ['happy', 'good', 'great', 'excellent', 'wonderful', 'amazing', 'love', 'like', 'excited', 'joy', 'pleased'];
+      const negativeWords = ['sad', 'bad', 'terrible', 'awful', 'hate', 'angry', 'frustrated', 'worried', 'anxious', 'depressed', 'lonely'];
+      
+      let positiveCount = 0;
+      let negativeCount = 0;
+      
+      positiveWords.forEach(word => {
+        if (allText.includes(word)) positiveCount++;
+      });
+      negativeWords.forEach(word => {
+        if (allText.includes(word)) negativeCount++;
+      });
+      
+      let sentiment = 'neutral';
+      if (positiveCount > negativeCount && positiveCount > 0) {
+        sentiment = 'positive';
+      } else if (negativeCount > positiveCount && negativeCount > 0) {
+        sentiment = 'negative';
+      }
+      
+      setCurrentSentiment(sentiment);
+      setEmotionBreakdown({
+        joy: 0.2,
+        sadness: 0.2,
+        anger: 0.1,
+        fear: 0.1,
+        neutral: 0.4
+      });
+      
+      setSentimentHistory(prev => [...prev, {
+        sentiment,
+        timestamp: new Date(),
+        messageCount: messages.length
+      }]);
     }
-    
-    setCurrentSentiment(sentiment);
-    
-    // Update emotion breakdown
-    setEmotionBreakdown({
-      joy: joyCount,
-      sadness: sadnessCount,
-      anger: angerCount,
-      fear: fearCount,
-      neutral: Math.max(0, 10 - (joyCount + sadnessCount + angerCount + fearCount))
-    });
-    
-    // Update sentiment history
-    setSentimentHistory(prev => [...prev, {
-      sentiment,
-      timestamp: new Date(),
-      messageCount: messages.length
-    }]);
     
     setIsAnalyzing(false);
   };

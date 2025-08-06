@@ -7,14 +7,24 @@ import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
 import RealTimeSentiment from "./RealTimeSentiment";
 
-const analyzeSentiment = (text) => {
-  const lowerText = text.toLowerCase();
-  if (lowerText.includes("happy") || lowerText.includes("great") || lowerText.includes("good")) {
-    return "Positive";
-  } else if (lowerText.includes("sad") || lowerText.includes("bad") || lowerText.includes("why")) {
-    return "Negative";
+const analyzeSentiment = async (text) => {
+  try {
+    const response = await api.post("/api/openai/sentiment", {
+      messages: [{ role: "user", content: text }]
+    });
+    const analysis = response.data;
+    return analysis.sentiment || "NEUTRAL";
+  } catch (error) {
+    console.error("Error analyzing sentiment:", error);
+    // Fallback to simple analysis
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes("happy") || lowerText.includes("great") || lowerText.includes("good")) {
+      return "POSITIVE";
+    } else if (lowerText.includes("sad") || lowerText.includes("bad") || lowerText.includes("why")) {
+      return "NEGATIVE";
+    }
+    return "NEUTRAL";
   }
-  return "Neutral";
 };
 
 const messageVariants = {
@@ -64,18 +74,19 @@ const Chatbot = () => {
   const handleSend = async () => {
     if (!input.trim()) return;
     
-    const userSentiment = analyzeSentiment(input);
-    const userMessage = {
-      sender: "user",
-      name: "Aman",
-      text: input,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      sentiment: userSentiment,
-    };
-    
     // Clear input immediately after capturing the message
     const currentInput = input;
     setInput("");
+    
+    // Analyze sentiment using OpenAI API
+    const userSentiment = await analyzeSentiment(currentInput);
+    const userMessage = {
+      sender: "user",
+      name: "Aman",
+      text: currentInput,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      sentiment: userSentiment,
+    };
     
     setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
