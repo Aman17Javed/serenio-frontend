@@ -77,7 +77,7 @@
 .input-icon {
   position: absolute;
   left: 16px;
-  color: rgba(255, 255, 255, 0.8); /* Improved contrast */
+  color: #6b7280; /* Dark gray color for visibility against white background */
   font-size: 18px;
   z-index: 2;
 }
@@ -85,10 +85,10 @@
 .login-input {
   width: 100%;
   padding: 16px 16px 16px 48px;
-  background: rgba(255, 255, 255, 0.15); /* Slightly more opaque for better readability */
-  border: 1px solid rgba(255, 255, 255, 0.3); /* Better border contrast */
+  background: rgba(255, 255, 255, 0.9); /* Much more opaque white background */
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Better border contrast */
   border-radius: 12px;
-  color: white; /* Ensure text is white for readability */
+  color: #1f2937; /* Dark text color for better visibility */
   font-size: 16px;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -96,27 +96,27 @@
 }
 
 .login-input::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Better placeholder contrast */
+  color: #6b7280; /* Dark gray placeholder for better visibility */
   font-weight: 400;
 }
 
 .login-input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.5); /* Better focus border */
-  background: rgba(255, 255, 255, 0.2); /* Better focus background */
+  border-color: #667eea; /* Blue focus border */
+  background: rgba(255, 255, 255, 0.95); /* Even more opaque on focus */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
 
 .login-input:hover {
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.18);
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .eye-icon {
   position: absolute;
   right: 16px;
-  color: rgba(255, 255, 255, 0.8); /* Improved contrast */
+  color: #6b7280; /* Dark gray color for visibility against white background */
   cursor: pointer;
   font-size: 18px;
   transition: all 0.3s ease;
@@ -124,7 +124,7 @@
 }
 
 .eye-icon:hover {
-  color: white;
+  color: #374151; /* Darker on hover */
   transform: scale(1.1);
 }
 
