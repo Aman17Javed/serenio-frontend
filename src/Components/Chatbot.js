@@ -35,10 +35,10 @@ const messageVariants = {
 const Chatbot = () => {
   const navigate = useNavigate();
   const [sessionId, setSessionId] = useState(() => {
-    const existing = localStorage.getItem("serenioSessionId");
-    if (existing) return existing;
+    // Always create a new session ID when the chatbot component loads
     const newId = uuidv4();
     localStorage.setItem("serenioSessionId", newId);
+    console.log("🆕 New chat session created:", newId);
     return newId;
   });
   const [messages, setMessages] = useState([]);
@@ -118,6 +118,9 @@ const Chatbot = () => {
   };
 
   const handleEndChat = () => {
+    console.log("🔚 Ending chat session:", sessionId);
+    // Clear the session ID from localStorage to ensure a fresh session next time
+    localStorage.removeItem("serenioSessionId");
     navigate(`/sentimentAnalysisDashboard/${sessionId}`);
   };
 
@@ -126,6 +129,7 @@ const Chatbot = () => {
     const newSessionId = uuidv4();
     setSessionId(newSessionId);
     localStorage.setItem("serenioSessionId", newSessionId);
+    console.log("🔄 New session created after clear chat:", newSessionId);
     
     // Clear messages and reset to initial state
     setMessages([

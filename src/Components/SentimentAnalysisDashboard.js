@@ -59,10 +59,10 @@ const SentimentAnalysisDashboard = () => {
     setLoading(true);
     setError("");
     try {
-      console.log("Fetching chat logs for session:", selectedSession);
+      console.log("🔍 Fetching chat logs for session:", selectedSession);
       const logsRes = await api.get(`/api/chatlogs/session/${selectedSession}`);
       const logs = logsRes.data;
-      console.log("Chat logs received:", logs);
+      console.log("📊 Chat logs received for session:", selectedSession, "Count:", logs.length);
       setChatLogs(logs);
 
       if (logs.length === 0) {
@@ -73,25 +73,31 @@ const SentimentAnalysisDashboard = () => {
         return;
       }
 
-      const messages = logs.map(log => ({
+      // Ensure we only analyze logs from this specific session
+      const sessionLogs = logs.filter(log => log.sessionId === selectedSession);
+      console.log("✅ Filtered logs for current session:", sessionLogs.length);
+
+      const messages = sessionLogs.map(log => ({
         role: "user",
         content: `${log.message} (Response: ${log.response})`
       }));
 
-      console.log("Sending messages for analysis:", messages);
+      console.log("🤖 Sending messages for analysis:", messages.length, "messages");
       const aiRes = await api.post("/api/openai/sentiment", { messages });
-      console.log("AI analysis response:", aiRes.data);
+      console.log("🧠 AI analysis response:", aiRes.data);
       setSentiment(aiRes.data.sentiment || "NEUTRAL");
       setRecommendation(aiRes.data.recommendation || "No recommendation available.");
 
       // Filter out any duplicate entries that might exist from the old double-saving issue
-      const uniqueLogs = logs.filter((log, index, self) => 
+      const uniqueLogs = sessionLogs.filter((log, index, self) => 
         index === self.findIndex(l => 
           l.message === log.message && 
           l.response === log.response && 
           l.createdAt === log.createdAt
         )
       );
+
+      console.log("📈 Processing unique logs:", uniqueLogs.length);
 
       // Generate sentiment trends and emotion breakdown using OpenAI API
       await generateSentimentTrends(uniqueLogs);
@@ -283,18 +289,36 @@ const SentimentAnalysisDashboard = () => {
   };
 
   const calculateSessionStats = (logs) => {
+    if (!logs || logs.length === 0) {
+      setSessionStats({
+        totalMessages: 0,
+        averageResponseTime: 0,
+        sessionDuration: 0,
+        engagementScore: 0
+      });
+      return;
+    }
+
     const totalMessages = logs.length;
-    const sessionDuration = logs.length > 1 
-      ? (new Date(logs[logs.length - 1].createdAt) - new Date(logs[0].createdAt)) / 1000 / 60
-      : 0;
+    
+    // Calculate session duration more accurately
+    let sessionDuration = 0;
+    if (logs.length > 1) {
+      const firstMessage = new Date(logs[0].createdAt);
+      const lastMessage = new Date(logs[logs.length - 1].createdAt);
+      sessionDuration = (lastMessage - firstMessage) / 1000 / 60; // Convert to minutes
+    }
+    
     const averageResponseTime = totalMessages > 0 ? sessionDuration / totalMessages : 0;
     const engagementScore = Math.min(100, (totalMessages / 10) * 100);
 
-    console.log("Session stats calculation:", {
+    console.log("📊 Session stats calculation for session:", selectedSession, {
       totalMessages,
-      sessionDuration,
-      averageResponseTime,
-      engagementScore
+      sessionDuration: `${sessionDuration.toFixed(2)} minutes`,
+      averageResponseTime: `${averageResponseTime.toFixed(2)} minutes`,
+      engagementScore: `${engagementScore}%`,
+      firstMessage: logs[0]?.createdAt,
+      lastMessage: logs[logs.length - 1]?.createdAt
     });
 
     setSessionStats({
