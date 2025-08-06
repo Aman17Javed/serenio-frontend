@@ -308,20 +308,21 @@ Redirecting to payment in 3 seconds...`);
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="appointment-header">
-        <h2>📅 Book Your Session</h2>
-        <p>Schedule your mental health session with {psychologist?.name}</p>
-      </div>
-
-      {psychologist && (
-        <div className="psychologist-info">
-          <h3>👨‍⚕️ {psychologist.name}</h3>
-          <p><strong>Specialization:</strong> {psychologist.specialization}</p>
-          <p><strong>Session Fee:</strong> PKR {psychologist.sessionPrice || psychologist.hourlyRate}</p>
+      <div className="appointment-content">
+        <div className="appointment-header">
+          <h2>📅 Book Your Session</h2>
+          <p>Schedule your mental health session with {psychologist?.name}</p>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="appointment-form">
+        {psychologist && (
+          <div className="psychologist-info">
+            <h3>👨‍⚕️ {psychologist.name}</h3>
+            <p><strong>Specialization:</strong> {psychologist.specialization}</p>
+            <p><strong>Session Fee:</strong> PKR {psychologist.sessionPrice || psychologist.hourlyRate}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="appointment-form">
         <div className="form-group">
           <label htmlFor="date">📅 Select Date</label>
           <input
@@ -332,6 +333,7 @@ Redirecting to payment in 3 seconds...`);
             onChange={handleChange}
             min={new Date().toISOString().split('T')[0]}
             max={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+            className="appointment-form-input"
             required
           />
           <small>Select a date within the next 3 months</small>
@@ -376,19 +378,20 @@ Redirecting to payment in 3 seconds...`);
             onChange={handleChange}
             placeholder="Please describe the reason for your session (e.g., stress, anxiety, relationship issues, etc.)"
             rows="4"
+            className="appointment-form-input"
             required
           />
           <small>This helps us prepare better for your session</small>
         </div>
 
         {error && (
-          <div className="error-message">
+          <div className="message error">
             <p>❌ {error}</p>
           </div>
         )}
 
         {message && (
-          <div className="success-message">
+          <div className="message success">
             <p>{message}</p>
           </div>
         )}
@@ -407,34 +410,36 @@ Redirecting to payment in 3 seconds...`);
 
       {/* Existing Appointments */}
       {appointments.length > 0 && (
-        <div className="existing-appointments">
+        <div className="appointment-list">
           <h3>📋 Your Upcoming Appointments</h3>
-          <div className="appointments-list">
+          <ul>
             {appointments
               .filter(appt => appt.status === 'Booked')
               .sort((a, b) => new Date(a.date) - new Date(b.date))
               .map((appointment) => (
-                <div key={appointment._id} className="appointment-card">
-                  <div className="appointment-header">
-                    <h4>Appointment with {appointment.psychologistName || 'Psychologist'}</h4>
-                    <span className="status booked">Booked</span>
-                  </div>
+                <li key={appointment._id}>
                   <div className="appointment-details">
-                    <p><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
-                    <p><strong>Time:</strong> {appointment.timeSlot}</p>
-                    {appointment.reason && <p><strong>Reason:</strong> {appointment.reason}</p>}
+                    <div className="appointment-info">
+                      <h4>Appointment with {appointment.psychologistName || 'Psychologist'}</h4>
+                      <p><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
+                      <p><strong>Time:</strong> {appointment.timeSlot}</p>
+                      {appointment.reason && <p><strong>Reason:</strong> {appointment.reason}</p>}
+                    </div>
+                    <div className="appointment-actions">
+                      <button
+                        onClick={() => handleCancel(appointment._id)}
+                        className="cancel-btn"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => handleCancel(appointment._id)}
-                    className="cancel-button"
-                  >
-                    Cancel Appointment
-                  </button>
-                </div>
+                </li>
               ))}
-          </div>
+          </ul>
         </div>
       )}
+      </div>
     </motion.div>
   );
 };
