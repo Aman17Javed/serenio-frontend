@@ -84,11 +84,20 @@ const SentimentAnalysisDashboard = () => {
       setSentiment(aiRes.data.sentiment || "NEUTRAL");
       setRecommendation(aiRes.data.recommendation || "No recommendation available.");
 
+      // Filter out any duplicate entries that might exist from the old double-saving issue
+      const uniqueLogs = logs.filter((log, index, self) => 
+        index === self.findIndex(l => 
+          l.message === log.message && 
+          l.response === log.response && 
+          l.createdAt === log.createdAt
+        )
+      );
+
       // Generate sentiment trends
-      generateSentimentTrends(logs);
-      generateEmotionBreakdown(logs);
-      generateTopics(logs);
-      calculateSessionStats(logs);
+      generateSentimentTrends(uniqueLogs);
+      generateEmotionBreakdown(uniqueLogs);
+      generateTopics(uniqueLogs);
+      calculateSessionStats(uniqueLogs);
 
     } catch (err) {
       console.error("Error fetching sentiment analysis:", err.response?.data || err.message);
@@ -183,8 +192,15 @@ const SentimentAnalysisDashboard = () => {
     const sessionDuration = logs.length > 1 
       ? (new Date(logs[logs.length - 1].createdAt) - new Date(logs[0].createdAt)) / 1000 / 60
       : 0;
-    const averageResponseTime = sessionDuration / totalMessages;
+    const averageResponseTime = totalMessages > 0 ? sessionDuration / totalMessages : 0;
     const engagementScore = Math.min(100, (totalMessages / 10) * 100);
+
+    console.log("Session stats calculation:", {
+      totalMessages,
+      sessionDuration,
+      averageResponseTime,
+      engagementScore
+    });
 
     setSessionStats({
       totalMessages,

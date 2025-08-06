@@ -63,6 +63,7 @@ const Chatbot = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
+    
     const userSentiment = analyzeSentiment(input);
     const userMessage = {
       sender: "user",
@@ -71,19 +72,17 @@ const Chatbot = () => {
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       sentiment: userSentiment,
     };
+    
+    // Clear input immediately after capturing the message
+    const currentInput = input;
+    setInput("");
+    
     setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
 
     try {
-      // Save user message to backend
-      await api.post("/api/chatlogs", {
-        sessionId,
-        message: input,
-        response: "", // Will be updated with bot response
-      });
-
-      // Simulate bot response (replace with actual API call if needed)
-      const res = await api.post("/api/chatbot/message", { message: input, sessionId });
+      // Send message to chatbot API (which will save to database)
+      const res = await api.post("/api/chatbot/message", { message: currentInput, sessionId });
       const botReply = {
         sender: "bot",
         name: "Serenio AI",
@@ -91,11 +90,6 @@ const Chatbot = () => {
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         sentiment: null,
       };
-
-      // Update chat log with bot response
-      await api.patch(`/api/chatlogs/${sessionId}/last`, {
-        response: botReply.text,
-      });
 
       setMessages((prev) => [...prev, botReply]);
     } catch (err) {
@@ -109,7 +103,6 @@ const Chatbot = () => {
       setMessages((prev) => [...prev, errorReply]);
     } finally {
       setLoading(false);
-      setInput("");
     }
   };
 
